@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 
 const outputFolder = "output";
-const framesFolder = "frames"
+const framesFolder = "frames";
 const binFolder = "bin";
 
 // Command line arguments
@@ -27,62 +27,56 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath);
 }
 
-(async () => {
-  try {
-    ffmpeg.ffprobe(videoPath, async (err, metadata) => {
-      if (err) {
-        console.error("Error reading video metadata:", err);
-        return;
-      }
-
-      const width = metadata.streams[0].width;
-      const height = metadata.streams[0].height;
-
-      if (width % 240 !== 0 || height % 240 !== 0) {
-        console.error("Error: The width and height of the video must be divisible by 240.");
-        process.exit(1);
-      }
-
-      const cropPositions = [
-        { x: 0, y: 0 }, // Top-left
-        { x: 240, y: 0 }, // Top-right
-        { x: 0, y: 240 }, // Bottom-left
-        { x: 240, y: 240 }, // Bottom-right
-      ];
-
-      // Process each part sequentially
-      for (let index = 0; index < cropPositions.length; index++) {
-        const pos = cropPositions[index];
-        const outputFileName = `part_${index + 1}.mp4`;
-        const outputFilePath = path.join(outputPath, outputFileName);
-
-        await new Promise((resolve, reject) => {
-          ffmpeg(videoPath)
-            .videoFilters({
-              filter: "crop",
-              options: `240:240:${pos.x}:${pos.y}`,
-            })
-            .output(outputFilePath)
-            .on("end", async () => {
-              console.log(`${outputFileName} has been saved.`);
-              await processPart(outputFilePath, index + 1);
-              resolve();
-            })
-            .on("error", (err) => {
-              console.log(`An error occurred: ${err.message}`);
-              reject(err);
-            })
-            .run();
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Failed to establish WebSocket connection:", error);
+ffmpeg.ffprobe(videoPath, async (err, metadata) => {
+  if (err) {
+    console.error("Error reading video metadata:", err);
+    return;
   }
-})();
+
+  const width = metadata.streams[0].width;
+  const height = metadata.streams[0].height;
+
+  if (width % 240 !== 0 || height % 240 !== 0) {
+    console.error("Error: The width and height of the video must be divisible by 240.");
+    process.exit(1);
+  }
+
+  const cropPositions = [
+    { x: 0, y: 0 }, // Top-left
+    { x: 240, y: 0 }, // Top-right
+    { x: 0, y: 240 }, // Bottom-left
+    { x: 240, y: 240 }, // Bottom-right
+  ];
+
+  // Process each part sequentially
+  for (let index = 0; index < cropPositions.length; index++) {
+    const pos = cropPositions[index];
+    const outputFileName = `part_${index + 1}.mp4`;
+    const outputFilePath = path.join(outputPath, outputFileName);
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(videoPath)
+        .videoFilters({
+          filter: "crop",
+          options: `240:240:${pos.x}:${pos.y}`,
+        })
+        .output(outputFilePath)
+        .on("end", async () => {
+          console.log(`${outputFileName} has been saved.`);
+          await processPart(outputFilePath, index + 1);
+          resolve();
+        })
+        .on("error", (err) => {
+          console.log(`An error occurred: ${err.message}`);
+          reject(err);
+        })
+        .run();
+    });
+  }
+});
 
 async function processPart(videoPartPath, partIndex) {
-  const output = path.join(__dirname,outputFolder, framesFolder, `part_${partIndex}`);
+  const output = path.join(__dirname, outputFolder, framesFolder, `part_${partIndex}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
   }
@@ -103,8 +97,8 @@ async function processPart(videoPartPath, partIndex) {
 }
 
 async function convertFramesToBinFiles(partIndex) {
-  const framesDir = path.join(__dirname, outputFolder,framesFolder, `part_${partIndex}`);
-  const outputDir = path.join(__dirname, outputFolder,binFolder, `part_${partIndex}`);
+  const framesDir = path.join(__dirname, outputFolder, framesFolder, `part_${partIndex}`);
+  const outputDir = path.join(__dirname, outputFolder, binFolder, `part_${partIndex}`);
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
