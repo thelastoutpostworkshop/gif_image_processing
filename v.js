@@ -9,6 +9,15 @@ const outputFolder = "output";
 const framesFolder = "frames";
 const binFolder = "bin";
 
+// Screen layout configuration
+const layoutConfig = {
+  totalScreens: 4, // Total number of screens
+  screensPerRow: 2, // Number of screens per row
+  screenWidth: 240, // Width of each screen (pixels)
+  screenHeight: 240, // Height of each screen (pixels)
+};
+
+
 // Command line arguments
 const [, , videoPath] = process.argv;
 
@@ -42,16 +51,9 @@ ffmpeg.ffprobe(videoPath, async (err, metadata) => {
     process.exit(1);
   }
 
-  const cropPositions = [
-    { x: 0, y: 0 }, // Top-left
-    { x: 240, y: 0 }, // Top-right
-    { x: 0, y: 240 }, // Bottom-left
-    { x: 240, y: 240 }, // Bottom-right
-  ];
-
   // Process each part sequentially
-  for (let index = 0; index < cropPositions.length; index++) {
-    const pos = cropPositions[index];
+  for (let index = 0; index < layoutConfig.totalScreens; index++) {
+    const pos = calculateScreenPosition(index);
     const outputFileName = `part_${index + 1}.mp4`;
     const outputFilePath = path.join(outputPath, outputFileName);
 
@@ -130,4 +132,14 @@ async function convertFramesToBinFiles(partIndex) {
       console.error("Error processing image:", err);
     }
   }
+}
+// Function to calculate the position (x, y coordinates) of each screen based on its index
+function calculateScreenPosition(screenIndex) {
+  const row = Math.floor(screenIndex / layoutConfig.screensPerRow);
+  const col = screenIndex % layoutConfig.screensPerRow;
+
+  const x = layoutConfig.screenWidth  * col;
+  const y = layoutConfig.screenHeight * row;
+
+  return { x, y };
 }
