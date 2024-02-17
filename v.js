@@ -23,9 +23,10 @@ if (!fs.existsSync(videoPath)) {
 }
 
 const outputPath = path.join(__dirname, outputFolder);
-if (!fs.existsSync(outputPath)) {
-  fs.mkdirSync(outputPath);
+if (fs.existsSync(outputPath)) {
+  fs.rmSync(outputPath, { recursive: true });
 }
+fs.mkdirSync(outputPath);
 
 ffmpeg.ffprobe(videoPath, async (err, metadata) => {
   if (err) {
