@@ -5,6 +5,10 @@ const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
 
+const outputFolder = "output";
+const FramesDir = "frames"
+const BinDir = "bin";
+
 // Command line arguments
 const [, , videoPath] = process.argv;
 
@@ -18,7 +22,7 @@ if (!fs.existsSync(videoPath)) {
   process.exit(1);
 }
 
-const outputPath = path.join(__dirname, "output");
+const outputPath = path.join(__dirname, outputFolder);
 if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath);
 }
@@ -61,7 +65,7 @@ if (!fs.existsSync(outputPath)) {
             .output(outputFilePath)
             .on("end", async () => {
               console.log(`${outputFileName} has been saved.`);
-              await processPart(outputFilePath, index + 1); // Pass the WebSocket connection
+              await processPart(outputFilePath, index + 1);
               resolve();
             })
             .on("error", (err) => {
@@ -78,18 +82,18 @@ if (!fs.existsSync(outputPath)) {
 })();
 
 async function processPart(videoPartPath, partIndex) {
-  const framesDir = path.join(__dirname, "frames", `part_${partIndex}`);
-  if (!fs.existsSync(framesDir)) {
-    fs.mkdirSync(framesDir, { recursive: true });
+  const output = path.join(__dirname,outputFolder, FramesDir, `part_${partIndex}`);
+  if (!fs.existsSync(output)) {
+    fs.mkdirSync(output, { recursive: true });
   }
 
-  const frameOutputPattern = path.join(framesDir, "frame_%03d.png");
+  const frameOutputPattern = path.join(output, "frame_%03d.png");
 
   ffmpeg(videoPartPath)
     .outputOptions("-vf", "fps=1")
     .output(frameOutputPattern)
     .on("end", async function () {
-      console.log(`Frames extracted for part ${partIndex} into ${framesDir}.`);
+      console.log(`Frames extracted for part ${partIndex} into ${output}.`);
       convertFramesToBinFiles(partIndex); // Use WebSocket connection
     })
     .on("error", function (err) {
@@ -99,8 +103,8 @@ async function processPart(videoPartPath, partIndex) {
 }
 
 async function convertFramesToBinFiles(partIndex) {
-  const framesDir = path.join(__dirname, "frames", `part_${partIndex}`);
-  const outputDir = path.join(__dirname, "bin", `part_${partIndex}`);
+  const framesDir = path.join(__dirname, outputFolder,FramesDir, `part_${partIndex}`);
+  const outputDir = path.join(__dirname, outputFolder,BinDir, `part_${partIndex}`);
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
