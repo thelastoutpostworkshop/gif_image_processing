@@ -88,7 +88,6 @@ async function processPart(videoPartPath, partIndex) {
     .outputOptions("-vf", "fps=1")
     .output(frameOutputPattern)
     .on("end", async function () {
-      console.log(`Frames extracted for part ${partIndex} into ${output}.`);
       convertFramesToBinFiles(partIndex); // Use WebSocket connection
     })
     .on("error", function (err) {
@@ -127,7 +126,6 @@ async function convertFramesToBinFiles(partIndex) {
       // Define the output filename for the .bin file
       const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
       fs.writeFileSync(outputFilePath, buffer);
-      console.log(`Frame ${index} written to ${outputFilePath}`);
     } catch (err) {
       console.error("Error processing image:", err);
     }
