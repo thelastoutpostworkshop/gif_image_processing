@@ -8,7 +8,9 @@ const path = require("path");
 const outputFolder = "output";
 const framesFolder = "frames";
 const binFolder = "bin";
-const screenPathPrefix = "screen_"
+const screenPathPrefix = "screen_";
+
+const port = 3000;
 
 // Screen layout configuration
 const layoutConfig = {
@@ -17,7 +19,6 @@ const layoutConfig = {
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
 };
-
 
 // Command line arguments
 const [, , videoPath] = process.argv;
@@ -38,49 +39,51 @@ if (fs.existsSync(outputPath)) {
 }
 fs.mkdirSync(outputPath);
 
-ffmpeg.ffprobe(videoPath, async (err, metadata) => {
-  if (err) {
-    console.error("Error reading video metadata:", err);
-    return;
-  }
+async function buildFrames() {
+   ffmpeg.ffprobe(videoPath, async (err, metadata) => {
+    if (err) {
+      console.error("Error reading video metadata:", err);
+      return;
+    }
 
-  const width = metadata.streams[0].width;
-  const height = metadata.streams[0].height;
+    const width = metadata.streams[0].width;
+    const height = metadata.streams[0].height;
 
-  if (width % 240 !== 0 || height % 240 !== 0) {
-    console.error("Error: The width and height of the video must be divisible by 240.");
-    process.exit(1);
-  }
+    if (width % 240 !== 0 || height % 240 !== 0) {
+      console.error("Error: The width and height of the video must be divisible by 240.");
+      process.exit(1);
+    }
 
-  // Process each part sequentially
-  for (let index = 0; index < layoutConfig.totalScreens; index++) {
-    const pos = calculateScreenPosition(index);
-    const outputFileName = `${screenPathPrefix}${index}.mp4`;
-    const outputFilePath = path.join(outputPath, outputFileName);
+    // Process each part sequentially
+    for (let index = 0; index < layoutConfig.totalScreens; index++) {
+      const pos = calculateScreenPosition(index);
+      const outputFileName = `${screenPathPrefix}${index}.mp4`;
+      const outputFilePath = path.join(outputPath, outputFileName);
 
-    await new Promise((resolve, reject) => {
-      ffmpeg(videoPath)
-        .videoFilters({
-          filter: "crop",
-          options: `240:240:${pos.x}:${pos.y}`,
-        })
-        .output(outputFilePath)
-        .on("end", async () => {
-          console.log(`${outputFileName} has been saved.`);
-          await processPart(outputFilePath, index + 1);
-          resolve();
-        })
-        .on("error", (err) => {
-          console.log(`An error occurred: ${err.message}`);
-          reject(err);
-        })
-        .run();
-    });
-  }
-});
+      await new Promise((resolve, reject) => {
+        ffmpeg(videoPath)
+          .videoFilters({
+            filter: "crop",
+            options: `240:240:${pos.x}:${pos.y}`,
+          })
+          .output(outputFilePath)
+          .on("end", async () => {
+            console.log(`${outputFileName} has been saved.`);
+            await processPart(outputFilePath, index + 1);
+            resolve();
+          })
+          .on("error", (err) => {
+            console.log(`An error occurred: ${err.message}`);
+            reject(err);
+          })
+          .run();
+      });
+    }
+  });
+}
 
 async function processPart(videoPartPath, partIndex) {
-  const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex-1}`);
+  const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
   }
@@ -94,14 +97,14 @@ async function processPart(videoPartPath, partIndex) {
       convertFramesToBinFiles(partIndex); // Use WebSocket connection
     })
     .on("error", function (err) {
-      console.log(`An error occurred while extracting frames for part ${partIndex-1}: ${err.message}`);
+      console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
     })
     .run();
 }
 
 async function convertFramesToBinFiles(partIndex) {
-  const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex-1}`);
-  const outputDir = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${partIndex-1}`);
+  const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
+  const outputDir = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${partIndex - 1}`);
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -139,8 +142,22 @@ function calculateScreenPosition(screenIndex) {
   const row = Math.floor(screenIndex / layoutConfig.screensPerRow);
   const col = screenIndex % layoutConfig.screensPerRow;
 
-  const x = layoutConfig.screenWidth  * col;
+  const x = layoutConfig.screenWidth * col;
   const y = layoutConfig.screenHeight * row;
 
   return { x, y };
 }
+
+(async () => {
+  await buildFrames(); // Wait for buildFrames to finish
+
+  // Now set up your routes
+  app.get("/", (req, res) => {
+    res.send("Hello World!");
+  });
+
+  // And start your server
+  app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+  });
+})();
