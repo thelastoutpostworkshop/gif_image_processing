@@ -77,7 +77,6 @@ if (!fs.existsSync(outputPath)) {
   }
 })();
 
-
 async function processPart(videoPartPath, partIndex) {
   const framesDir = path.join(__dirname, "frames", `part_${partIndex}`);
   if (!fs.existsSync(framesDir)) {
@@ -91,7 +90,7 @@ async function processPart(videoPartPath, partIndex) {
     .output(frameOutputPattern)
     .on("end", async function () {
       console.log(`Frames extracted for part ${partIndex} into ${framesDir}.`);
-      convertFramesToBytesAndSend(partIndex); // Use WebSocket connection
+      convertFramesToBinFiles(partIndex); // Use WebSocket connection
     })
     .on("error", function (err) {
       console.log(`An error occurred while extracting frames for part ${partIndex}: ${err.message}`);
@@ -99,11 +98,18 @@ async function processPart(videoPartPath, partIndex) {
     .run();
 }
 
-async function convertFramesToBytesAndSend(partIndex) {
+async function convertFramesToBinFiles(partIndex) {
   const framesDir = path.join(__dirname, "frames", `part_${partIndex}`);
-  const files = fs.readdirSync(framesDir).filter((file) => path.extname(file) === ".png");
+  const outputDir = path.join(__dirname, "bin", `part_${partIndex}`);
 
-  for (const [index, file] of files.entries()) {
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const files = fs.readdirSync(framesDir);
+  const pngFiles = files.filter((file) => path.extname(file) === ".png");
+
+  for (const [index, file] of pngFiles.entries()) {
     try {
       const image = await Jimp.read(path.join(framesDir, file));
       let buffer = Buffer.alloc(image.bitmap.width * image.bitmap.height * 2); // Buffer for RGB565 data
@@ -118,7 +124,11 @@ async function convertFramesToBytesAndSend(partIndex) {
           offset += 2;
         }
       }
-          
+
+      // Define the output filename for the .bin file
+      const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
+      fs.writeFileSync(outputFilePath, buffer);
+      console.log(`Frame ${index} written to ${outputFilePath}`);
     } catch (err) {
       console.error("Error processing image:", err);
     }
