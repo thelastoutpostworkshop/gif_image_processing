@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const Jimp = require("jimp");
-const WebSocket = require("ws");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
@@ -24,37 +23,8 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath);
 }
 
-// Setup WebSocket connection
-async function setupWebSocket() {
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket("ws://sphere.local/ws");
-
-    ws.on("open", function open() {
-      console.log("WebSocket connection established");
-      resolve(ws);
-    });
-
-    ws.on("error", function error(error) {
-      console.error("WebSocket error:", error);
-      reject(error);
-    });
-  });
-}
-
-// Function to send WebSocket message
-function sendWebSocketMessage(ws, data) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(data);
-    console.log("Message sent");
-  } else {
-    console.error("WebSocket is not open. Message not sent.");
-  }
-}
-
 (async () => {
   try {
-    const ws = await setupWebSocket(); // Wait for WebSocket connection
-
     ffmpeg.ffprobe(videoPath, async (err, metadata) => {
       if (err) {
         console.error("Error reading video metadata:", err);
@@ -91,7 +61,7 @@ function sendWebSocketMessage(ws, data) {
             .output(outputFilePath)
             .on("end", async () => {
               console.log(`${outputFileName} has been saved.`);
-              await processPart(outputFilePath, index + 1, ws); // Pass the WebSocket connection
+              await processPart(outputFilePath, index + 1); // Pass the WebSocket connection
               resolve();
             })
             .on("error", (err) => {
@@ -108,7 +78,7 @@ function sendWebSocketMessage(ws, data) {
 })();
 
 
-async function processPart(videoPartPath, partIndex, ws) {
+async function processPart(videoPartPath, partIndex) {
   const framesDir = path.join(__dirname, "frames", `part_${partIndex}`);
   if (!fs.existsSync(framesDir)) {
     fs.mkdirSync(framesDir, { recursive: true });
@@ -121,9 +91,7 @@ async function processPart(videoPartPath, partIndex, ws) {
     .output(frameOutputPattern)
     .on("end", async function () {
       console.log(`Frames extracted for part ${partIndex} into ${framesDir}.`);
-      ws.send("start image");
-      await convertFramesToBytesAndSend(partIndex, ws); // Use WebSocket connection
-      ws.send("end image");
+      convertFramesToBytesAndSend(partIndex); // Use WebSocket connection
     })
     .on("error", function (err) {
       console.log(`An error occurred while extracting frames for part ${partIndex}: ${err.message}`);
@@ -131,7 +99,7 @@ async function processPart(videoPartPath, partIndex, ws) {
     .run();
 }
 
-async function convertFramesToBytesAndSend(partIndex, ws) {
+async function convertFramesToBytesAndSend(partIndex) {
   const framesDir = path.join(__dirname, "frames", `part_${partIndex}`);
   const files = fs.readdirSync(framesDir).filter((file) => path.extname(file) === ".png");
 
@@ -150,15 +118,7 @@ async function convertFramesToBytesAndSend(partIndex, ws) {
           offset += 2;
         }
       }
-
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send("start frame");
-        ws.send(buffer);
-        ws.send("end frame");
-        console.log(`Frame ${index} sent for part ${partIndex}`);
-      } else {
-        console.error("WebSocket is not open. Frame not sent.");
-      }
+          
     } catch (err) {
       console.error("Error processing image:", err);
     }
