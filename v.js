@@ -150,7 +150,9 @@ async function convertFramesToBytesAndSend(partIndex, ws) {
       }
 
       if (ws.readyState === WebSocket.OPEN) {
+        ws.send("start");
         ws.send(buffer);
+        ws.send("end");
         console.log(`Frame ${index} sent for part ${partIndex}`);
       } else {
         console.error("WebSocket is not open. Frame not sent.");
