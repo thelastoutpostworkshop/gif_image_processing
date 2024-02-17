@@ -6,8 +6,8 @@ const fs = require("fs");
 const path = require("path");
 
 const outputFolder = "output";
-const FramesDir = "frames"
-const BinDir = "bin";
+const framesFolder = "frames"
+const binFolder = "bin";
 
 // Command line arguments
 const [, , videoPath] = process.argv;
@@ -82,7 +82,7 @@ if (!fs.existsSync(outputPath)) {
 })();
 
 async function processPart(videoPartPath, partIndex) {
-  const output = path.join(__dirname,outputFolder, FramesDir, `part_${partIndex}`);
+  const output = path.join(__dirname,outputFolder, framesFolder, `part_${partIndex}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
   }
@@ -103,8 +103,8 @@ async function processPart(videoPartPath, partIndex) {
 }
 
 async function convertFramesToBinFiles(partIndex) {
-  const framesDir = path.join(__dirname, outputFolder,FramesDir, `part_${partIndex}`);
-  const outputDir = path.join(__dirname, outputFolder,BinDir, `part_${partIndex}`);
+  const framesDir = path.join(__dirname, outputFolder,framesFolder, `part_${partIndex}`);
+  const outputDir = path.join(__dirname, outputFolder,binFolder, `part_${partIndex}`);
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
