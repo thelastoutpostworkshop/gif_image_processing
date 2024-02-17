@@ -8,6 +8,7 @@ const path = require("path");
 const outputFolder = "output";
 const framesFolder = "frames";
 const binFolder = "bin";
+const screenPathPrefix = "screen_"
 
 // Screen layout configuration
 const layoutConfig = {
@@ -54,7 +55,7 @@ ffmpeg.ffprobe(videoPath, async (err, metadata) => {
   // Process each part sequentially
   for (let index = 0; index < layoutConfig.totalScreens; index++) {
     const pos = calculateScreenPosition(index);
-    const outputFileName = `part_${index + 1}.mp4`;
+    const outputFileName = `${screenPathPrefix}${index}.mp4`;
     const outputFilePath = path.join(outputPath, outputFileName);
 
     await new Promise((resolve, reject) => {
@@ -79,7 +80,7 @@ ffmpeg.ffprobe(videoPath, async (err, metadata) => {
 });
 
 async function processPart(videoPartPath, partIndex) {
-  const output = path.join(__dirname, outputFolder, framesFolder, `part_${partIndex}`);
+  const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex-1}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
   }
@@ -93,14 +94,14 @@ async function processPart(videoPartPath, partIndex) {
       convertFramesToBinFiles(partIndex); // Use WebSocket connection
     })
     .on("error", function (err) {
-      console.log(`An error occurred while extracting frames for part ${partIndex}: ${err.message}`);
+      console.log(`An error occurred while extracting frames for part ${partIndex-1}: ${err.message}`);
     })
     .run();
 }
 
 async function convertFramesToBinFiles(partIndex) {
-  const framesDir = path.join(__dirname, outputFolder, framesFolder, `part_${partIndex}`);
-  const outputDir = path.join(__dirname, outputFolder, binFolder, `part_${partIndex}`);
+  const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex-1}`);
+  const outputDir = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${partIndex-1}`);
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
