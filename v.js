@@ -121,7 +121,9 @@ async function processPart(videoPartPath, partIndex, ws) {
     .output(frameOutputPattern)
     .on("end", async function () {
       console.log(`Frames extracted for part ${partIndex} into ${framesDir}.`);
+      ws.send("start image");
       await convertFramesToBytesAndSend(partIndex, ws); // Use WebSocket connection
+      ws.send("end image");
     })
     .on("error", function (err) {
       console.log(`An error occurred while extracting frames for part ${partIndex}: ${err.message}`);
@@ -150,9 +152,9 @@ async function convertFramesToBytesAndSend(partIndex, ws) {
       }
 
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send("start");
+        ws.send("start frame");
         ws.send(buffer);
-        ws.send("end");
+        ws.send("end frame");
         console.log(`Frame ${index} sent for part ${partIndex}`);
       } else {
         console.error("WebSocket is not open. Frame not sent.");
