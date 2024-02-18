@@ -148,6 +148,30 @@ function calculateScreenPosition(screenIndex) {
   return { x, y };
 }
 
+function framesCount() {
+  const screenNumber = 0;
+  const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`);
+  return countFilesInFolder(framesDir);
+}
+function countFilesInFolder(folderPath) {
+  try {
+    // Read directory contents
+    const entries = fs.readdirSync(folderPath);
+
+    // Filter the entries to count only files
+    const files = entries.filter(entry => {
+      const entryPath = path.join(folderPath, entry);
+      return fs.statSync(entryPath).isFile();
+    });
+
+    // Return the count of files
+    return files.length;
+  } catch (error) {
+    console.error('Error reading folder:', error);
+    return -1; // Return 0 or handle the error as appropriate for your application
+  }
+}
+
 (async () => {
   await buildFrames(); // Wait for buildFrames to finish
 
@@ -160,4 +184,8 @@ function calculateScreenPosition(screenIndex) {
   app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
   });
+
+  console.log(framesCount());
+
 })();
+
