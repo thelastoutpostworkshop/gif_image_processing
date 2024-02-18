@@ -182,7 +182,7 @@ function getFrameDataFromFile(filePath) {
 
 function getFrameData(screenNumber,frameNumber) {
   const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
-  const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.png`);
+  const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.bin`);
   return getFrameDataFromFile(frameFile);
 }
 
