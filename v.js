@@ -4,6 +4,7 @@ const Jimp = require("jimp");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
+const os = require('os');
 
 const outputFolder = "output";
 const framesFolder = "frames";
@@ -184,16 +185,39 @@ function countFilesInFolder(folderPath) {
   }
 }
 
+function getServerIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip over non-IPv4 and internal (i.e., localhost) addresses
+      if ("IPv4" !== iface.family || iface.internal !== false) continue;
+      return iface.address;
+    }
+  }
+  return "0.0.0.0";
+}
+
+function printClientIP(req) {
+  // Attempt to get the IP address from the 'x-forwarded-for' header first (in case of proxy)
+  // Then fall back to the direct connection's remote address
+  const ip = (req.headers["x-forwarded-for"] || "").split(",").shift() || req.connection.remoteAddress || req.socket.remoteAddress;
+
+  // Log the IP address to the console
+  console.log(`Client IP Address: ${ip}`);
+}
+
 (async () => {
   await buildFrames(); // Wait for buildFrames to finish
 
-  app.get('/frames-count', (req, res) => {
+  app.get("/api/frames-count", (req, res) => {
+    printClientIP(req);
     const count = framesCount();
     res.json({ count });
   });
-  
+
   // And start your server
   app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    const ip = getServerIP(); // Get the server IP
+    console.log(`Image Server listening at http://${ip}:${port}`);
   });
 })();
