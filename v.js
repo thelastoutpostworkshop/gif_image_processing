@@ -174,7 +174,8 @@ async function convertFramesToBinFiles(partIndex) {
       // Define the output filename for the .bin file
       const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
       const frameNumber = extractFrameNumberFromString(outputFilePath);
-      console.log(`screen ${partIndex-1} frame ${frameNumber}`);
+      addFrameData(partIndex-1,frameNumber,buffer);
+      console.log(`screen ${partIndex-1} frame ${frameNumber-1}`);
       fs.writeFileSync(outputFilePath, buffer);
     } catch (err) {
       console.error("Error processing image:", err);
@@ -230,11 +231,11 @@ function getFrameDataFromFile(filePath) {
   }
 }
 
-function getFrameData(screenNumber,frameNumber) {
-  const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
-  const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.bin`);
-  return getFrameDataFromFile(frameFile);
-}
+// function getFrameData(screenNumber,frameNumber) {
+//   const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
+//   const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.bin`);
+//   return getFrameDataFromFile(frameFile);
+// }
 
 function countFilesInFolder(folderPath) {
   try {
