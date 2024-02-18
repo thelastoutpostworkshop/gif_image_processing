@@ -198,19 +198,23 @@ function getServerIP() {
 }
 
 function getClientIP(req) {
-  // Attempt to get the IP address from the 'x-forwarded-for' header first (in case of proxy)
-  // Then fall back to the direct connection's remote address
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+  // Check if the IP is in IPv6 format (IPv4-mapped IPv6)
+  if (ip.startsWith('::ffff:')) {
+    ip = ip.split('::ffff:')[1];
+  }
 
   return ip;
 }
+
 
 (async () => {
   await buildFrames(); // Wait for buildFrames to finish
 
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
-    console.log(`Sent Frame count = ${count} to ${getClientIP()}`);
+    console.log(`Sent Frame count = ${count} to ${getClientIP(req)}`);
     res.json({ count });
   });
 
