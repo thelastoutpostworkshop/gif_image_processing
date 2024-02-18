@@ -12,6 +12,8 @@ const binFolder = "bin";
 const screenPathPrefix = "screen_";
 const framePathPrefix = "frame_";
 
+const FPS = 20;
+
 const port = 3000;
 
 // Screen layout configuration
@@ -105,7 +107,7 @@ async function processPart(videoPartPath, partIndex) {
   const frameOutputPattern = path.join(output, "frame_%03d.png");
 
   ffmpeg(videoPartPath)
-    .outputOptions("-vf", "fps=1")
+    .outputOptions("-vf", `fps=${FPS}`)
     .output(frameOutputPattern)
     .on("end", async function () {
       convertFramesToBinFiles(partIndex); // Use WebSocket connection
@@ -171,7 +173,7 @@ function framesCount() {
 function getFrameDataFromFile(filePath) {
   try {
     const data = fs.readFileSync(filePath);
-    console.log(`Size of data read from ${filePath}: ${data.length} bytes`);
+    // console.log(`Size of data read from ${filePath}: ${data.length} bytes`);
 
     return data;
   } catch (err) {
@@ -252,7 +254,7 @@ function getClientIP(req) {
       }
   
       const frameData = getFrameData(screenNumber, frameNumber);
-      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+      // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
   
       // Set the appropriate Content-Type for binary data
       res.setHeader('Content-Type', 'application/octet-stream');
