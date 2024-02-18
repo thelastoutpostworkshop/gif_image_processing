@@ -16,6 +16,32 @@ const FPS = 20;
 
 const port = 3000;
 
+// Structure to store binary data
+let screens = {};
+
+// Function to add frame data
+function addFrameData(screenNumber, frameNumber, frameData) {
+    // Ensure there is an entry for the screen
+    if (!screens[screenNumber]) {
+        screens[screenNumber] = {};
+    }
+
+    // Store the frame data by frame number within the specific screen entry
+    screens[screenNumber][frameNumber] = frameData;
+}
+
+// Function to get frame data
+function getFrameData(screenNumber, frameNumber) {
+    // Ensure the screen and frame exist before attempting to access the data
+    if (screens[screenNumber] && screens[screenNumber][frameNumber]) {
+        return screens[screenNumber][frameNumber];
+    } else {
+        console.error('No data found for screen', screenNumber, 'frame', frameNumber);
+        return null;
+    }
+}
+
+
 // Screen layout configuration
 const layoutConfig = {
   totalScreens: 4, // Total number of screens
@@ -147,12 +173,27 @@ async function convertFramesToBinFiles(partIndex) {
 
       // Define the output filename for the .bin file
       const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
+      const frameNumber = extractFrameNumberFromString(outputFilePath);
+      console.log(`screen ${partIndex-1} frame ${frameNumber}`);
       fs.writeFileSync(outputFilePath, buffer);
     } catch (err) {
       console.error("Error processing image:", err);
     }
   }
 }
+
+function extractFrameNumberFromString(path) {
+  const match = path.match(/frame_(\d+)/); // This regex matches "frame_" followed by one or more digits (\d+)
+
+  if (match && match[1]) {
+    return parseInt(match[1], 10); // Convert the matched group (the numbers) to an integer
+  } else {
+    console.error("No numbers found in the string");
+    return null; // Or any other error handling or default value
+  }
+}
+
+
 // Function to calculate the position (x, y coordinates) of each screen based on its index
 function calculateScreenPosition(screenIndex) {
   const row = Math.floor(screenIndex / layoutConfig.screensPerRow);
@@ -172,15 +213,15 @@ function framesCount() {
 
 function getFrameDataFromFile(filePath) {
   try {
-    const start = process.hrtime.bigint(); // Start time in nanoseconds
+    // const start = process.hrtime.bigint(); // Start time in nanoseconds
 
     const data = fs.readFileSync(filePath);
     // console.log(`Size of data read from ${filePath}: ${data.length} bytes`);
 
-    const end = process.hrtime.bigint(); // End time in nanoseconds
-    const durationInNanoseconds = end - start;
-    const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
-    console.log(`Read file took ${durationInMilliseconds} milliseconds.`);
+    // const end = process.hrtime.bigint(); // End time in nanoseconds
+    // const durationInNanoseconds = end - start;
+    // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
+    // console.log(`Read file took ${durationInMilliseconds} milliseconds.`);
 
     return data;
   } catch (err) {
@@ -249,7 +290,7 @@ function getClientIP(req) {
 
   app.get('/api/frame/:screenNumber/:frameNumber', (req, res) => {
     try {
-      const start = process.hrtime.bigint(); // Start time in nanoseconds
+      // const start = process.hrtime.bigint(); // Start time in nanoseconds
 
       // Convert screenNumber and frameNumber to integers
       const screenNumber = parseInt(req.params.screenNumber, 10);
@@ -269,10 +310,10 @@ function getClientIP(req) {
       res.setHeader('Content-Type', 'application/octet-stream');
       res.send(frameData);
 
-      const end = process.hrtime.bigint(); // End time in nanoseconds
-      const durationInNanoseconds = end - start;
-      const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
-      console.log(`API call took ${durationInMilliseconds} milliseconds.`);
+      // const end = process.hrtime.bigint(); // End time in nanoseconds
+      // const durationInNanoseconds = end - start;
+      // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
+      // console.log(`API call took ${durationInMilliseconds} milliseconds.`);
 
     } catch (error) {
       console.error(error);
