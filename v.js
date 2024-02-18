@@ -104,7 +104,7 @@ async function buildFrames() {
               .output(outputFilePath)
               .on("end", async () => {
                 console.log(`${outputFileName} has been saved.`);
-                await processPart(outputFilePath, index + 1);
+                await processPartJPG(outputFilePath, index + 1);
                 innerResolve(); // Resolve the inner Promise
               })
               .on("error", (err) => {
@@ -124,7 +124,35 @@ async function buildFrames() {
   });
 }
 
-async function processPart(videoPartPath, partIndex) {
+async function processPartJPG(videoPartPath, partIndex) {
+  const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
+  if (!fs.existsSync(output)) {
+    fs.mkdirSync(output, { recursive: true });
+  }
+
+  // Change the file extension from .png to .jpg
+  const frameOutputPattern = path.join(output, "frame_%03d.jpg");
+
+  return new Promise((resolve, reject) => {
+    ffmpeg(videoPartPath)
+      .outputOptions("-vf", `fps=${FPS}`)
+      // Optionally, specify JPEG quality (e.g., 90%)
+      .outputOptions("-q:v", "2") // JPEG quality scale: 2 is high quality, 31 is low quality.
+      .output(frameOutputPattern)
+      .on("end", function () {
+        convertFramesToBinFiles(partIndex) // Assuming convertFramesToBinFiles returns a Promise
+          .then(resolve)
+          .catch(reject);
+      })
+      .on("error", function (err) {
+        console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
+        reject(err);
+      })
+      .run();
+  });
+}
+
+async function processPartPNG(videoPartPath, partIndex) {
   const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
@@ -241,6 +269,11 @@ function getFrameDataFromFile(filePath) {
 //   const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.bin`);
 //   return getFrameDataFromFile(frameFile);
 // }
+function getFrameJPGData(screenNumber,frameNumber) {
+  const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
+  const frameFile = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.jpg`);
+  return getFrameDataFromFile(frameFile);
+}
 
 function countFilesInFolder(folderPath) {
   try {
@@ -310,6 +343,38 @@ function getClientIP(req) {
       }
   
       const frameData = getFrameData(screenNumber, frameNumber);
+      // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+  
+      // Set the appropriate Content-Type for binary data
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.send(frameData);
+
+      // const end = process.hrtime.bigint(); // End time in nanoseconds
+      // const durationInNanoseconds = end - start;
+      // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
+      // console.log(`API call took ${durationInMilliseconds} milliseconds.`);
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error retrieving frame data');
+    }
+  });
+  app.get('/api/framejpg/:screenNumber/:frameNumber', (req, res) => {
+    try {
+      // const start = process.hrtime.bigint(); // Start time in nanoseconds
+
+      // Convert screenNumber and frameNumber to integers
+      const screenNumber = parseInt(req.params.screenNumber, 10);
+      const frameNumber = parseInt(req.params.frameNumber, 10);
+  
+      // Validate the conversion results to ensure they are numbers
+      if (isNaN(screenNumber) || isNaN(frameNumber)) {
+        // Respond with an error if the conversion fails
+        res.status(400).send('Screen number and frame number must be valid integers');
+        return;
+      }
+  
+      const frameData = getFrameJPGData(screenNumber, frameNumber);
       // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
   
       // Set the appropriate Content-Type for binary data
