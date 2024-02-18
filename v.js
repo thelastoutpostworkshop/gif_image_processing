@@ -179,8 +179,8 @@ async function convertFramesToBinFiles(partIndex) {
       // Define the output filename for the .bin file
       const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
       const frameNumber = extractFrameNumberFromString(outputFilePath);
-      addFrameData(partIndex-1,frameNumber,buffer);
-      console.log(`screen ${partIndex-1} frame ${frameNumber-1}`);
+      addFrameData(partIndex-1,frameNumber-1,buffer);
+      // console.log(`screen ${partIndex-1} frame ${frameNumber-1}`);
       fs.writeFileSync(outputFilePath, buffer);
     } catch (err) {
       console.error("Error processing image:", err);
@@ -333,5 +333,4 @@ function getClientIP(req) {
     const ip = getServerIP(); // Get the server IP
     console.log(`Image Server listening at http://${ip}:${port}`);
   });
-  getFrameData(0,0);
 })();
