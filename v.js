@@ -240,11 +240,20 @@ function getClientIP(req) {
 
   app.get('/api/frame/:screenNumber/:frameNumber', (req, res) => {
     try {
-      const screenNumber = req.params.screenNumber;
-      const frameNumber = req.params.frameNumber;
+      // Convert screenNumber and frameNumber to integers
+      const screenNumber = parseInt(req.params.screenNumber, 10);
+      const frameNumber = parseInt(req.params.frameNumber, 10);
+  
+      // Validate the conversion results to ensure they are numbers
+      if (isNaN(screenNumber) || isNaN(frameNumber)) {
+        // Respond with an error if the conversion fails
+        res.status(400).send('Screen number and frame number must be valid integers');
+        return;
+      }
+  
       const frameData = getFrameData(screenNumber, frameNumber);
       console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
-
+  
       // Set the appropriate Content-Type for binary data
       res.setHeader('Content-Type', 'application/octet-stream');
       res.send(frameData);
@@ -253,6 +262,7 @@ function getClientIP(req) {
       res.status(500).send('Error retrieving frame data');
     }
   });
+  
 
   // And start your server
   app.listen(port, () => {
