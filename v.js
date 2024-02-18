@@ -171,6 +171,8 @@ function framesCount() {
 function getFrameDataFromFile(filePath) {
   try {
     const data = fs.readFileSync(filePath);
+    console.log(`Size of data read from ${filePath}: ${data.length} bytes`);
+
     return data;
   } catch (err) {
     console.error('Error reading frame:', err);
@@ -180,7 +182,7 @@ function getFrameDataFromFile(filePath) {
 
 function getFrameData(screenNumber,frameNumber) {
   const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
-  const frameFile = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.png`);
+  const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.png`);
   return getFrameDataFromFile(frameFile);
 }
 
@@ -257,6 +259,4 @@ function getClientIP(req) {
     const ip = getServerIP(); // Get the server IP
     console.log(`Image Server listening at http://${ip}:${port}`);
   });
-
-  getFrameData(0,0);
 })();
