@@ -187,15 +187,13 @@ function countFilesInFolder(folderPath) {
 (async () => {
   await buildFrames(); // Wait for buildFrames to finish
 
-  // Now set up your routes
-  app.get("/", (req, res) => {
-    res.send("Hello World!");
+  app.get('/frames-count', (req, res) => {
+    const count = framesCount();
+    res.json({ count });
   });
-
+  
   // And start your server
   app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
   });
-
-  console.log(framesCount());
 })();
