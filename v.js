@@ -4,7 +4,7 @@ const Jimp = require("jimp");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
-const os = require('os');
+const os = require("os");
 
 const outputFolder = "output";
 const framesFolder = "frames";
@@ -197,21 +197,20 @@ function getServerIP() {
   return "0.0.0.0";
 }
 
-function printClientIP(req) {
+function getClientIP(req) {
   // Attempt to get the IP address from the 'x-forwarded-for' header first (in case of proxy)
   // Then fall back to the direct connection's remote address
-  const ip = (req.headers["x-forwarded-for"] || "").split(",").shift() || req.connection.remoteAddress || req.socket.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  // Log the IP address to the console
-  console.log(`Client IP Address: ${ip}`);
+  return ip;
 }
 
 (async () => {
   await buildFrames(); // Wait for buildFrames to finish
 
   app.get("/api/frames-count", (req, res) => {
-    printClientIP(req);
     const count = framesCount();
+    console.log(`Sent Frame count = ${count} to ${getClientIP()}`);
     res.json({ count });
   });
 
