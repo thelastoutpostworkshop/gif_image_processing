@@ -40,45 +40,57 @@ if (fs.existsSync(outputPath)) {
 fs.mkdirSync(outputPath);
 
 async function buildFrames() {
-   ffmpeg.ffprobe(videoPath, async (err, metadata) => {
-    if (err) {
-      console.error("Error reading video metadata:", err);
-      return;
-    }
+  return new Promise((resolve, reject) => {
+    // Wrap the ffprobe call in a Promise
+    ffmpeg.ffprobe(videoPath, async (err, metadata) => {
+      if (err) {
+        console.error("Error reading video metadata:", err);
+        reject(err); // Reject the Promise on error
+        return;
+      }
 
-    const width = metadata.streams[0].width;
-    const height = metadata.streams[0].height;
+      const width = metadata.streams[0].width;
+      const height = metadata.streams[0].height;
 
-    if (width % 240 !== 0 || height % 240 !== 0) {
-      console.error("Error: The width and height of the video must be divisible by 240.");
-      process.exit(1);
-    }
+      if (width % 240 !== 0 || height % 240 !== 0) {
+        console.error("Error: The width and height of the video must be divisible by 240.");
+        reject(new Error("Invalid video dimensions")); // Reject the Promise
+        return;
+      }
 
-    // Process each part sequentially
-    for (let index = 0; index < layoutConfig.totalScreens; index++) {
-      const pos = calculateScreenPosition(index);
-      const outputFileName = `${screenPathPrefix}${index}.mp4`;
-      const outputFilePath = path.join(outputPath, outputFileName);
+      // Process each part sequentially
+      for (let index = 0; index < layoutConfig.totalScreens; index++) {
+        const pos = calculateScreenPosition(index);
+        const outputFileName = `${screenPathPrefix}${index}.mp4`;
+        const outputFilePath = path.join(outputPath, outputFileName);
 
-      await new Promise((resolve, reject) => {
-        ffmpeg(videoPath)
-          .videoFilters({
-            filter: "crop",
-            options: `240:240:${pos.x}:${pos.y}`,
-          })
-          .output(outputFilePath)
-          .on("end", async () => {
-            console.log(`${outputFileName} has been saved.`);
-            await processPart(outputFilePath, index + 1);
-            resolve();
-          })
-          .on("error", (err) => {
-            console.log(`An error occurred: ${err.message}`);
-            reject(err);
-          })
-          .run();
-      });
-    }
+        try {
+          await new Promise((innerResolve, innerReject) => {
+            ffmpeg(videoPath)
+              .videoFilters({
+                filter: "crop",
+                options: `240:240:${pos.x}:${pos.y}`,
+              })
+              .output(outputFilePath)
+              .on("end", async () => {
+                console.log(`${outputFileName} has been saved.`);
+                await processPart(outputFilePath, index + 1);
+                innerResolve(); // Resolve the inner Promise
+              })
+              .on("error", (err) => {
+                console.log(`An error occurred: ${err.message}`);
+                innerReject(err); // Reject the inner Promise
+              })
+              .run();
+          });
+        } catch (error) {
+          reject(error); // Reject the outer Promise if any error occurs in the loop
+          return;
+        }
+      }
+
+      resolve(); // Resolve the outer Promise after all processing is done
+    });
   });
 }
 
@@ -159,7 +171,7 @@ function countFilesInFolder(folderPath) {
     const entries = fs.readdirSync(folderPath);
 
     // Filter the entries to count only files
-    const files = entries.filter(entry => {
+    const files = entries.filter((entry) => {
       const entryPath = path.join(folderPath, entry);
       return fs.statSync(entryPath).isFile();
     });
@@ -167,7 +179,7 @@ function countFilesInFolder(folderPath) {
     // Return the count of files
     return files.length;
   } catch (error) {
-    console.error('Error reading folder:', error);
+    console.error("Error reading folder:", error);
     return -1; // Return 0 or handle the error as appropriate for your application
   }
 }
@@ -186,6 +198,4 @@ function countFilesInFolder(folderPath) {
   });
 
   console.log(framesCount());
-
 })();
-
