@@ -10,6 +10,7 @@ const outputFolder = "output";
 const framesFolder = "frames";
 const binFolder = "bin";
 const screenPathPrefix = "screen_";
+const framePathPrefix = "frame_";
 
 const port = 3000;
 
@@ -166,6 +167,23 @@ function framesCount() {
   const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`);
   return countFilesInFolder(framesDir);
 }
+
+function getFrameDataFromFile(filePath) {
+  try {
+    const data = fs.readFileSync(filePath);
+    return data;
+  } catch (err) {
+    console.error('Error reading frame:', err);
+    throw err; // 
+  }
+}
+
+function getFrameData(screenNumber,frameNumber) {
+  const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
+  const frameFile = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.png`);
+  return getFrameDataFromFile(frameFile);
+}
+
 function countFilesInFolder(folderPath) {
   try {
     // Read directory contents
@@ -223,4 +241,6 @@ function getClientIP(req) {
     const ip = getServerIP(); // Get the server IP
     console.log(`Image Server listening at http://${ip}:${port}`);
   });
+
+  getFrameData(0,0);
 })();
