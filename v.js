@@ -232,8 +232,24 @@ function getClientIP(req) {
 
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
-    console.log(`Sent Frame count = ${count} to ${getClientIP(req)}`);
+    console.log(`Sending Frame count = ${count} to ${getClientIP(req)}`);
     res.send(count.toString());
+  });
+
+  app.get('/api/frame/:screenNumber/:frameNumber', (req, res) => {
+    try {
+      const screenNumber = req.params.screenNumber;
+      const frameNumber = req.params.frameNumber;
+      const frameData = getFrameData(screenNumber, frameNumber);
+      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+
+      // Set the appropriate Content-Type for binary data
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.send(frameData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error retrieving frame data');
+    }
   });
 
   // And start your server
