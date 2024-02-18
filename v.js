@@ -132,16 +132,21 @@ async function processPart(videoPartPath, partIndex) {
 
   const frameOutputPattern = path.join(output, "frame_%03d.png");
 
-  ffmpeg(videoPartPath)
-    .outputOptions("-vf", `fps=${FPS}`)
-    .output(frameOutputPattern)
-    .on("end", async function () {
-      convertFramesToBinFiles(partIndex); // Use WebSocket connection
-    })
-    .on("error", function (err) {
-      console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
-    })
-    .run();
+  return new Promise((resolve, reject) => {
+    ffmpeg(videoPartPath)
+      .outputOptions("-vf", `fps=${FPS}`)
+      .output(frameOutputPattern)
+      .on("end", function () {
+        convertFramesToBinFiles(partIndex) // Assuming convertFramesToBinFiles returns a Promise
+          .then(resolve)
+          .catch(reject);
+      })
+      .on("error", function (err) {
+        console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
+        reject(err);
+      })
+      .run();
+  });
 }
 
 async function convertFramesToBinFiles(partIndex) {
