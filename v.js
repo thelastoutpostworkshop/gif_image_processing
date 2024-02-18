@@ -215,7 +215,7 @@ function getClientIP(req) {
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
     console.log(`Sent Frame count = ${count} to ${getClientIP(req)}`);
-    res.json({ count });
+    res.send(count.toString());
   });
 
   // And start your server
