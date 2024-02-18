@@ -172,8 +172,15 @@ function framesCount() {
 
 function getFrameDataFromFile(filePath) {
   try {
+    const start = process.hrtime.bigint(); // Start time in nanoseconds
+
     const data = fs.readFileSync(filePath);
     // console.log(`Size of data read from ${filePath}: ${data.length} bytes`);
+
+    const end = process.hrtime.bigint(); // End time in nanoseconds
+    const durationInNanoseconds = end - start;
+    const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
+    console.log(`Read file took ${durationInMilliseconds} milliseconds.`);
 
     return data;
   } catch (err) {
@@ -242,6 +249,8 @@ function getClientIP(req) {
 
   app.get('/api/frame/:screenNumber/:frameNumber', (req, res) => {
     try {
+      const start = process.hrtime.bigint(); // Start time in nanoseconds
+
       // Convert screenNumber and frameNumber to integers
       const screenNumber = parseInt(req.params.screenNumber, 10);
       const frameNumber = parseInt(req.params.frameNumber, 10);
@@ -259,6 +268,12 @@ function getClientIP(req) {
       // Set the appropriate Content-Type for binary data
       res.setHeader('Content-Type', 'application/octet-stream');
       res.send(frameData);
+
+      const end = process.hrtime.bigint(); // End time in nanoseconds
+      const durationInNanoseconds = end - start;
+      const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
+      console.log(`API call took ${durationInMilliseconds} milliseconds.`);
+
     } catch (error) {
       console.error(error);
       res.status(500).send('Error retrieving frame data');
