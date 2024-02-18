@@ -328,4 +328,5 @@ function getClientIP(req) {
     const ip = getServerIP(); // Get the server IP
     console.log(`Image Server listening at http://${ip}:${port}`);
   });
+  getFrameData(0,0);
 })();
