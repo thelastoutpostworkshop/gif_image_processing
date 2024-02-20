@@ -375,7 +375,7 @@ function getClientIP(req) {
       }
   
       const frameData = getFrameJPGData(screenNumber, frameNumber);
-      // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
   
       // Set the appropriate Content-Type for binary data
       res.setHeader('Content-Type', 'application/octet-stream');
