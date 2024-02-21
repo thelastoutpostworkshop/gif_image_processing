@@ -1,5 +1,5 @@
-const express = require("express");
-const app = express();
+// Require the framework and instantiate it
+const app = require("fastify")({ logger: true });
 const Jimp = require("jimp");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
@@ -21,26 +21,25 @@ let screens = {};
 
 // Function to add frame data
 function addFrameData(screenNumber, frameNumber, frameData) {
-    // Ensure there is an entry for the screen
-    if (!screens[screenNumber]) {
-        screens[screenNumber] = {};
-    }
+  // Ensure there is an entry for the screen
+  if (!screens[screenNumber]) {
+    screens[screenNumber] = {};
+  }
 
-    // Store the frame data by frame number within the specific screen entry
-    screens[screenNumber][frameNumber] = frameData;
+  // Store the frame data by frame number within the specific screen entry
+  screens[screenNumber][frameNumber] = frameData;
 }
 
 // Function to get frame data
 function getFrameData(screenNumber, frameNumber) {
-    // Ensure the screen and frame exist before attempting to access the data
-    if (screens[screenNumber] && screens[screenNumber][frameNumber]) {
-        return screens[screenNumber][frameNumber];
-    } else {
-        console.error('No data found for screen', screenNumber, 'frame', frameNumber);
-        return null;
-    }
+  // Ensure the screen and frame exist before attempting to access the data
+  if (screens[screenNumber] && screens[screenNumber][frameNumber]) {
+    return screens[screenNumber][frameNumber];
+  } else {
+    console.error("No data found for screen", screenNumber, "frame", frameNumber);
+    return null;
+  }
 }
-
 
 // Screen layout configuration
 const layoutConfig = {
@@ -207,7 +206,7 @@ async function convertFramesToBinFiles(partIndex) {
       // Define the output filename for the .bin file
       const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
       const frameNumber = extractFrameNumberFromString(outputFilePath);
-      addFrameData(partIndex-1,frameNumber-1,buffer);
+      addFrameData(partIndex - 1, frameNumber - 1, buffer);
       // console.log(`screen ${partIndex-1} frame ${frameNumber-1}`);
       fs.writeFileSync(outputFilePath, buffer);
     } catch (err) {
@@ -226,7 +225,6 @@ function extractFrameNumberFromString(path) {
     return null; // Or any other error handling or default value
   }
 }
-
 
 // Function to calculate the position (x, y coordinates) of each screen based on its index
 function calculateScreenPosition(screenIndex) {
@@ -259,8 +257,8 @@ function getFrameDataFromFile(filePath) {
 
     return data;
   } catch (err) {
-    console.error('Error reading frame:', err);
-    throw err; // 
+    console.error("Error reading frame:", err);
+    throw err; //
   }
 }
 
@@ -269,9 +267,15 @@ function getFrameDataFromFile(filePath) {
 //   const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.bin`);
 //   return getFrameDataFromFile(frameFile);
 // }
-function getFrameJPGData(screenNumber,frameNumber) {
-  const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
-  const frameFile = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.jpg`);
+function getFrameJPGData(screenNumber, frameNumber) {
+  const formattedFrameNumber = String(frameNumber + 1).padStart(3, "0");
+  const frameFile = path.join(
+    __dirname,
+    outputFolder,
+    framesFolder,
+    `${screenPathPrefix}${screenNumber}`,
+    `${framePathPrefix}${formattedFrameNumber}.jpg`
+  );
   return getFrameDataFromFile(frameFile);
 }
 
@@ -307,16 +311,15 @@ function getServerIP() {
 }
 
 function getClientIP(req) {
-  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
   // Check if the IP is in IPv6 format (IPv4-mapped IPv6)
-  if (ip.startsWith('::ffff:')) {
-    ip = ip.split('::ffff:')[1];
+  if (ip.startsWith("::ffff:")) {
+    ip = ip.split("::ffff:")[1];
   }
 
   return ip;
 }
-
 
 (async () => {
   await buildFrames(); // Wait for buildFrames to finish
@@ -327,75 +330,77 @@ function getClientIP(req) {
     res.send(count.toString());
   });
 
-  app.get('/api/frame/:screenNumber/:frameNumber', (req, res) => {
+  app.get("/api/frame/:screenNumber/:frameNumber", (req, res) => {
     try {
       // const start = process.hrtime.bigint(); // Start time in nanoseconds
 
       // Convert screenNumber and frameNumber to integers
       const screenNumber = parseInt(req.params.screenNumber, 10);
       const frameNumber = parseInt(req.params.frameNumber, 10);
-  
+
       // Validate the conversion results to ensure they are numbers
       if (isNaN(screenNumber) || isNaN(frameNumber)) {
         // Respond with an error if the conversion fails
-        res.status(400).send('Screen number and frame number must be valid integers');
+        res.status(400).send("Screen number and frame number must be valid integers");
         return;
       }
-  
+
       const frameData = getFrameData(screenNumber, frameNumber);
       // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
-  
+
       // Set the appropriate Content-Type for binary data
-      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader("Content-Type", "application/octet-stream");
       res.send(frameData);
 
       // const end = process.hrtime.bigint(); // End time in nanoseconds
       // const durationInNanoseconds = end - start;
       // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
       // console.log(`API call took ${durationInMilliseconds} milliseconds.`);
-
     } catch (error) {
       console.error(error);
-      res.status(500).send('Error retrieving frame data');
+      res.status(500).send("Error retrieving frame data");
     }
   });
-  app.get('/api/framejpg/:screenNumber/:frameNumber', (req, res) => {
+  app.get("/api/framejpg/:screenNumber/:frameNumber", (req, res) => {
     try {
       // const start = process.hrtime.bigint(); // Start time in nanoseconds
 
       // Convert screenNumber and frameNumber to integers
       const screenNumber = parseInt(req.params.screenNumber, 10);
       const frameNumber = parseInt(req.params.frameNumber, 10);
-  
+      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+
       // Validate the conversion results to ensure they are numbers
       if (isNaN(screenNumber) || isNaN(frameNumber)) {
         // Respond with an error if the conversion fails
-        res.status(400).send('Screen number and frame number must be valid integers');
+        res.status(400).send("Screen number and frame number must be valid integers");
         return;
       }
-  
+
       const frameData = getFrameJPGData(screenNumber, frameNumber);
       console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
-  
+
       // Set the appropriate Content-Type for binary data
-      res.setHeader('Content-Type', 'application/octet-stream');
+      // res.setHeader("Content-Type", "application/octet-stream");
+
       res.send(frameData);
 
       // const end = process.hrtime.bigint(); // End time in nanoseconds
       // const durationInNanoseconds = end - start;
       // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
       // console.log(`API call took ${durationInMilliseconds} milliseconds.`);
-
     } catch (error) {
       console.error(error);
-      res.status(500).send('Error retrieving frame data');
+      res.status(500).send("Error retrieving frame data");
     }
   });
-  
 
-  // And start your server
-  app.listen(port, () => {
-    const ip = getServerIP(); // Get the server IP
-    console.log(`Image Server listening at http://${ip}:${port}`);
+  app.listen({ port: 3000, host: "192.168.1.90" }, (err, address) => {
+    if (err) {
+      fastify.log.error(err);
+      process.exit(1);
+    } else {
+      console.log(`Image Server listening at ${address}`);
+    }
   });
 })();
