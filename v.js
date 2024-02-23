@@ -248,18 +248,6 @@ function countFilesInFolder(folderPath) {
   }
 }
 
-function getServerIP() {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      // Skip over non-IPv4 and internal (i.e., localhost) addresses
-      if ("IPv4" !== iface.family || iface.internal !== false) continue;
-      return iface.address;
-    }
-  }
-  return "0.0.0.0";
-}
-
 function getClientIP(req) {
   let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
