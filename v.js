@@ -1,5 +1,5 @@
 // Require the framework and instantiate it
-const app = require("fastify")({ logger: true });
+const app = require("fastify")({ logger: false });
 const Jimp = require("jimp");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
@@ -15,31 +15,6 @@ const framePathPrefix = "frame_";
 const FPS = 20;
 
 const port = 3000;
-
-// Structure to store binary data
-let screens = {};
-
-// Function to add frame data
-function addFrameData(screenNumber, frameNumber, frameData) {
-  // Ensure there is an entry for the screen
-  if (!screens[screenNumber]) {
-    screens[screenNumber] = {};
-  }
-
-  // Store the frame data by frame number within the specific screen entry
-  screens[screenNumber][frameNumber] = frameData;
-}
-
-// Function to get frame data
-function getFrameData(screenNumber, frameNumber) {
-  // Ensure the screen and frame exist before attempting to access the data
-  if (screens[screenNumber] && screens[screenNumber][frameNumber]) {
-    return screens[screenNumber][frameNumber];
-  } else {
-    console.error("No data found for screen", screenNumber, "frame", frameNumber);
-    return null;
-  }
-}
 
 // Screen layout configuration
 const layoutConfig = {
