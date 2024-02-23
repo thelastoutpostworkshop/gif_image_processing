@@ -1,10 +1,8 @@
 // Require the framework and instantiate it
 const app = require("fastify")({ logger: false });
-const Jimp = require("jimp");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
-const os = require("os");
 
 const outputFolder = "output";
 const framesFolder = "frames";
