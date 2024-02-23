@@ -114,9 +114,8 @@ async function processPartJPG(videoPartPath, partIndex) {
       .outputOptions("-q:v", "2") // JPEG quality scale: 2 is high quality, 31 is low quality.
       .output(frameOutputPattern)
       .on("end", function () {
-        convertFramesToBinFiles(partIndex) // Assuming convertFramesToBinFiles returns a Promise
-          .then(resolve)
-          .catch(reject);
+        // Directly resolve the promise since convertFramesToBinFiles(partIndex) call is removed
+        resolve();
       })
       .on("error", function (err) {
         console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
@@ -124,56 +123,6 @@ async function processPartJPG(videoPartPath, partIndex) {
       })
       .run();
   });
-}
-
-async function convertFramesToBinFiles(partIndex) {
-  const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
-  const outputDir = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${partIndex - 1}`);
-
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-
-  const files = fs.readdirSync(framesDir);
-  const pngFiles = files.filter((file) => path.extname(file) === ".png");
-
-  for (const [index, file] of pngFiles.entries()) {
-    try {
-      const image = await Jimp.read(path.join(framesDir, file));
-      let buffer = Buffer.alloc(image.bitmap.width * image.bitmap.height * 2); // Buffer for RGB565 data
-      let offset = 0;
-
-      for (let y = 0; y < image.bitmap.height; y++) {
-        for (let x = 0; x < image.bitmap.width; x++) {
-          const pixel = image.getPixelColor(x, y);
-          const rgba = Jimp.intToRGBA(pixel);
-          const rgb565 = ((rgba.r & 0xf8) << 8) | ((rgba.g & 0xfc) << 3) | (rgba.b >> 3);
-          buffer.writeUInt16BE(rgb565, offset);
-          offset += 2;
-        }
-      }
-
-      // Define the output filename for the .bin file
-      const outputFilePath = path.join(outputDir, `${path.basename(file, ".png")}.bin`);
-      const frameNumber = extractFrameNumberFromString(outputFilePath);
-      addFrameData(partIndex - 1, frameNumber - 1, buffer);
-      // console.log(`screen ${partIndex-1} frame ${frameNumber-1}`);
-      fs.writeFileSync(outputFilePath, buffer);
-    } catch (err) {
-      console.error("Error processing image:", err);
-    }
-  }
-}
-
-function extractFrameNumberFromString(path) {
-  const match = path.match(/frame_(\d+)/); // This regex matches "frame_" followed by one or more digits (\d+)
-
-  if (match && match[1]) {
-    return parseInt(match[1], 10); // Convert the matched group (the numbers) to an integer
-  } else {
-    console.error("No numbers found in the string");
-    return null; // Or any other error handling or default value
-  }
 }
 
 // Function to calculate the position (x, y coordinates) of each screen based on its index
