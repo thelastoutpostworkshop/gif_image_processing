@@ -126,31 +126,6 @@ async function processPartJPG(videoPartPath, partIndex) {
   });
 }
 
-async function processPartPNG(videoPartPath, partIndex) {
-  const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
-  if (!fs.existsSync(output)) {
-    fs.mkdirSync(output, { recursive: true });
-  }
-
-  const frameOutputPattern = path.join(output, "frame_%03d.png");
-
-  return new Promise((resolve, reject) => {
-    ffmpeg(videoPartPath)
-      .outputOptions("-vf", `fps=${FPS}`)
-      .output(frameOutputPattern)
-      .on("end", function () {
-        convertFramesToBinFiles(partIndex) // Assuming convertFramesToBinFiles returns a Promise
-          .then(resolve)
-          .catch(reject);
-      })
-      .on("error", function (err) {
-        console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
-        reject(err);
-      })
-      .run();
-  });
-}
-
 async function convertFramesToBinFiles(partIndex) {
   const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
   const outputDir = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${partIndex - 1}`);
