@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "fastify": "^4.26.1",
-    "fluent-ffmpeg": "^2.1.2",
-    "ws": "^8.16.0"
+    "fluent-ffmpeg": "^2.1.2"
   }
 }
