@@ -20,6 +20,12 @@ const layoutConfig = {
   screensPerRow: 2, // Number of screens per row
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
+  screens: [
+    { id: 0, address: BigInt("0x1FFFFFFFFFFFFFFF") },
+    { id: 1, address: BigInt("0x2FFFFFFFFFFFFFFF") },
+    { id: 2, address: BigInt("0x3FFFFFFFFFFFFFFF") },
+    { id: 3, address: BigInt("0x4FFFFFFFFFFFFFFF") },
+  ],
 };
 
 // Command line arguments
