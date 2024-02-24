@@ -10,7 +10,7 @@ const binFolder = "bin";
 const screenPathPrefix = "screen_";
 const framePathPrefix = "frame_";
 
-const FPS = 20;
+const FPS = 24;
 
 const port = 3000;
 
