@@ -16,16 +16,11 @@ const port = 3000;
 
 // Screen layout configuration
 const layoutConfig = {
-  totalScreens: 4, // Total number of screens
+  totalScreens: 8, // Total number of screens
   screensPerRow: 2, // Number of screens per row
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
-  screens: [
-    { id: 0, address: BigInt("0x1FFFFFFFFFFFFFFF") },
-    { id: 1, address: BigInt("0x2FFFFFFFFFFFFFFF") },
-    { id: 2, address: BigInt("0x3FFFFFFFFFFFFFFF") },
-    { id: 3, address: BigInt("0x4FFFFFFFFFFFFFFF") },
-  ],
+  screens: [{ id: "26506643932468" }],
 };
 
 // Command line arguments
