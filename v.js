@@ -141,17 +141,6 @@ async function processPartJPG(videoPartPath,screenGroup, screen) {
   });
 }
 
-// Function to calculate the position (x, y coordinates) of each screen based on its index
-function calculateScreenPosition(screenIndex) {
-  const row = Math.floor(screenIndex / layoutConfig.screensPerRow);
-  const col = screenIndex % layoutConfig.screensPerRow;
-
-  const x = layoutConfig.screenWidth * col;
-  const y = layoutConfig.screenHeight * row;
-
-  return { x, y };
-}
-
 function framesCount() {
   const screenNumber = 0;
   const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`);
