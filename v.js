@@ -61,6 +61,37 @@ if (fs.existsSync(outputPath)) {
 }
 fs.mkdirSync(outputPath);
 
+function checkLayoutResolution() {
+  let maxWidth = 0;
+  let maxHeight = 0;
+
+  layoutConfig.screens.forEach((group) => {
+    group.screenDetails.forEach((screen) => {
+      // Calculate the rightmost and bottommost edges of each screen
+      const rightEdge = screen.x + layoutConfig.screenWidth;
+      const bottomEdge = screen.y + layoutConfig.screenHeight;
+
+      // Update maxWidth and maxHeight if this screen extends beyond the previous maximum
+      maxWidth = Math.max(maxWidth, rightEdge);
+      maxHeight = Math.max(maxHeight, bottomEdge);
+    });
+  });
+
+  // Calculate the expected total width and height based on the layout configuration
+  const expectedWidth = layoutConfig.screensPerRow * layoutConfig.screenWidth;
+  // Assuming each row has the same number of screens and screens are evenly distributed in rows
+  const numRows = layoutConfig.totalScreens / layoutConfig.screensPerRow;
+  const expectedHeight = numRows * layoutConfig.screenHeight;
+
+  // Check if the calculated dimensions match the expected dimensions
+  if (maxWidth === expectedWidth && maxHeight === expectedHeight) {
+    return true;
+  } else {
+    console.log(`Mismatch in layout resolution. Expected: ${expectedWidth}x${expectedHeight}, Found: ${maxWidth}x${maxHeight}`);
+    return false;
+  }
+}
+
 async function buildFramesWithLayout() {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(videoPath, async (err, metadata) => {
@@ -156,7 +187,7 @@ function getFrameDataFromFile(filePath) {
   }
 }
 
-function getFrameJPGData(espid,screenNumber, frameNumber) {
+function getFrameJPGData(espid, screenNumber, frameNumber) {
   const formattedFrameNumber = String(frameNumber + 1).padStart(3, "0");
   const frameFile = path.join(
     __dirname,
@@ -200,7 +231,9 @@ function getClientIP(req) {
 }
 
 (async () => {
-  // await buildFrames(); // Wait for buildFrames to finish
+  if (!checkLayoutResolution()) {
+    process.exit(1);
+  }
   await buildFramesWithLayout();
 
   app.get("/api/frames-count", (req, res) => {
@@ -214,8 +247,8 @@ function getClientIP(req) {
       const screenNumber = parseInt(req.params.screenNumber, 10);
       const frameNumber = parseInt(req.params.frameNumber, 10);
       const espid = req.params.espid;
-      console.log(`ESP id=${espid}`);
-      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+      // console.log(`ESP id=${espid}`);
+      // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
 
       // Validate the conversion results to ensure they are numbers
       if (isNaN(screenNumber) || isNaN(frameNumber)) {
