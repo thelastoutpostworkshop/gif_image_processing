@@ -30,6 +30,15 @@ const layoutConfig = {
         { num: 3, x: 240, y: 720 },
       ],
     },
+    {
+      id: "150596872602932",
+      screenDetails: [
+        { num: 0, x: 0, y: 0 },
+        { num: 1, x: 0, y: 240 },
+        { num: 2, x: 0, y: 480 },
+        { num: 3, x: 0, y: 720 },
+      ],
+    },
 
   ],
 };
@@ -87,8 +96,8 @@ async function buildFrames() {
               })
               .output(outputFilePath)
               .on("end", async () => {
-                console.log(`${outputFileName} has been saved.`);
                 await processPartJPG(outputFilePath, index + 1);
+                console.log(`${outputFileName} has been saved.`);
                 innerResolve(); // Resolve the inner Promise
               })
               .on("error", (err) => {
