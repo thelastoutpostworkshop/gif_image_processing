@@ -93,7 +93,7 @@ async function buildFramesWithLayout() {
                 })
                 .output(outputFilePath)
                 .on("end", async () => {
-                  await processPartJPG(outputFilePath,screenGroup, screen);
+                  await processPartJPG(outputFilePath, screenGroup, screen);
 
                   console.log(`${outputFileName} has been saved.`);
                   innerResolve();
@@ -114,7 +114,7 @@ async function buildFramesWithLayout() {
   });
 }
 
-async function processPartJPG(videoPartPath,screenGroup, screen) {
+async function processPartJPG(videoPartPath, screenGroup, screen) {
   const output = path.join(__dirname, outputFolder, framesFolder, screenGroup.id, `${screenPathPrefix}${screen.num}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
@@ -142,7 +142,7 @@ async function processPartJPG(videoPartPath,screenGroup, screen) {
 }
 
 function framesCount() {
-  const framesDir = path.join(__dirname, outputFolder, framesFolder,layoutConfig.screens[0].id ,`${screenPathPrefix}0`);
+  const framesDir = path.join(__dirname, outputFolder, framesFolder, layoutConfig.screens[0].id, `${screenPathPrefix}0`);
   return countFilesInFolder(framesDir);
 }
 
@@ -156,17 +156,13 @@ function getFrameDataFromFile(filePath) {
   }
 }
 
-// function getFrameData(screenNumber,frameNumber) {
-//   const formattedFrameNumber = String(frameNumber+1).padStart(3, '0');
-//   const frameFile = path.join(__dirname, outputFolder, binFolder, `${screenPathPrefix}${screenNumber}`, `${framePathPrefix}${formattedFrameNumber}.bin`);
-//   return getFrameDataFromFile(frameFile);
-// }
-function getFrameJPGData(screenNumber, frameNumber) {
+function getFrameJPGData(espid,screenNumber, frameNumber) {
   const formattedFrameNumber = String(frameNumber + 1).padStart(3, "0");
   const frameFile = path.join(
     __dirname,
     outputFolder,
     framesFolder,
+    espid,
     `${screenPathPrefix}${screenNumber}`,
     `${framePathPrefix}${formattedFrameNumber}.jpg`
   );
@@ -228,11 +224,10 @@ function getClientIP(req) {
         return;
       }
 
-      const frameData = getFrameJPGData(screenNumber, frameNumber);
-      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+      const frameData = getFrameJPGData(espid, screenNumber, frameNumber);
+      console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ESPID=${espid} ip=${getClientIP(req)}`);
 
       res.send(frameData);
-
     } catch (error) {
       console.error(error);
       res.status(500).send("Error retrieving frame data");
