@@ -85,9 +85,6 @@ async function buildFramesWithLayout() {
             const outputFileName = `screen_${screenGroup.id}_${screen.num}.mp4`;
             const outputFilePath = path.join(__dirname, outputFolder, outputFileName);
 
-            console.log(outputFilePath);
-            console.log(`${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`);
-
             await new Promise((innerResolve, innerReject) => {
               ffmpeg(videoPath)
                 .videoFilters({
