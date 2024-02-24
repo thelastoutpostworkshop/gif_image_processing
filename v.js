@@ -20,7 +20,18 @@ const layoutConfig = {
   screensPerRow: 2, // Number of screens per row
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
-  screens: [{ id: "26506643932468" }],
+  screens: [
+    {
+      id: "26506643932468",
+      screenDetails: [
+        { num: 0, x: 240, y: 0 },
+        { num: 1, x: 240, y: 240 },
+        { num: 2, x: 240, y: 480 },
+        { num: 3, x: 240, y: 720 },
+      ],
+    },
+
+  ],
 };
 
 // Command line arguments
