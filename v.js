@@ -148,16 +148,7 @@ function framesCount() {
 
 function getFrameDataFromFile(filePath) {
   try {
-    // const start = process.hrtime.bigint(); // Start time in nanoseconds
-
     const data = fs.readFileSync(filePath);
-    // console.log(`Size of data read from ${filePath}: ${data.length} bytes`);
-
-    // const end = process.hrtime.bigint(); // End time in nanoseconds
-    // const durationInNanoseconds = end - start;
-    // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
-    // console.log(`Read file took ${durationInMilliseconds} milliseconds.`);
-
     return data;
   } catch (err) {
     console.error("Error reading frame:", err);
