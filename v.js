@@ -142,8 +142,7 @@ async function processPartJPG(videoPartPath,screenGroup, screen) {
 }
 
 function framesCount() {
-  const screenNumber = 0;
-  const framesDir = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${screenNumber}`);
+  const framesDir = path.join(__dirname, outputFolder, framesFolder,layoutConfig.screens[0].id ,`${screenPathPrefix}0`);
   return countFilesInFolder(framesDir);
 }
 
