@@ -39,7 +39,6 @@ const layoutConfig = {
         { num: 3, x: 0, y: 720 },
       ],
     },
-
   ],
 };
 
@@ -62,63 +61,64 @@ if (fs.existsSync(outputPath)) {
 }
 fs.mkdirSync(outputPath);
 
-async function buildFrames() {
+async function buildFramesWithLayout() {
   return new Promise((resolve, reject) => {
-    // Wrap the ffprobe call in a Promise
     ffmpeg.ffprobe(videoPath, async (err, metadata) => {
       if (err) {
         console.error("Error reading video metadata:", err);
-        reject(err); // Reject the Promise on error
+        reject(err);
         return;
       }
 
       const width = metadata.streams[0].width;
       const height = metadata.streams[0].height;
 
-      if (width % 240 !== 0 || height % 240 !== 0) {
-        console.error("Error: The width and height of the video must be divisible by 240.");
-        reject(new Error("Invalid video dimensions")); // Reject the Promise
+      if (width % layoutConfig.screenWidth !== 0 || height % layoutConfig.screenHeight !== 0) {
+        console.error("Error: The video dimensions must be divisible by the screen dimensions.");
+        reject(new Error("Invalid video dimensions"));
         return;
       }
 
-      // Process each part sequentially
-      for (let index = 0; index < layoutConfig.totalScreens; index++) {
-        const pos = calculateScreenPosition(index);
-        const outputFileName = `${screenPathPrefix}${index}.mp4`;
-        const outputFilePath = path.join(outputPath, outputFileName);
+      try {
+        for (const screenGroup of layoutConfig.screens) {
+          for (const screen of screenGroup.screenDetails) {
+            const outputFileName = `screen_${screenGroup.id}_${screen.num}.mp4`;
+            const outputFilePath = path.join(__dirname, outputFolder, outputFileName);
 
-        try {
-          await new Promise((innerResolve, innerReject) => {
-            ffmpeg(videoPath)
-              .videoFilters({
-                filter: "crop",
-                options: `240:240:${pos.x}:${pos.y}`,
-              })
-              .output(outputFilePath)
-              .on("end", async () => {
-                await processPartJPG(outputFilePath, index + 1);
-                console.log(`${outputFileName} has been saved.`);
-                innerResolve(); // Resolve the inner Promise
-              })
-              .on("error", (err) => {
-                console.log(`An error occurred: ${err.message}`);
-                innerReject(err); // Reject the inner Promise
-              })
-              .run();
-          });
-        } catch (error) {
-          reject(error); // Reject the outer Promise if any error occurs in the loop
-          return;
+            console.log(outputFilePath);
+            console.log(`${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`);
+
+            await new Promise((innerResolve, innerReject) => {
+              ffmpeg(videoPath)
+                .videoFilters({
+                  filter: "crop",
+                  options: `${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`,
+                })
+                .output(outputFilePath)
+                .on("end", async () => {
+                  await processPartJPG(outputFilePath,screenGroup, screen);
+
+                  console.log(`${outputFileName} has been saved.`);
+                  innerResolve();
+                })
+                .on("error", (err) => {
+                  console.log(`An error occurred: ${err.message}`);
+                  innerReject(err);
+                })
+                .run();
+            });
+          }
         }
+        resolve();
+      } catch (error) {
+        reject(error);
       }
-
-      resolve(); // Resolve the outer Promise after all processing is done
     });
   });
 }
 
-async function processPartJPG(videoPartPath, partIndex) {
-  const output = path.join(__dirname, outputFolder, framesFolder, `${screenPathPrefix}${partIndex - 1}`);
+async function processPartJPG(videoPartPath,screenGroup, screen) {
+  const output = path.join(__dirname, outputFolder, framesFolder, screenGroup.id, `${screenPathPrefix}${screen.num}`);
   if (!fs.existsSync(output)) {
     fs.mkdirSync(output, { recursive: true });
   }
@@ -228,7 +228,8 @@ function getClientIP(req) {
 }
 
 (async () => {
-  await buildFrames(); // Wait for buildFrames to finish
+  // await buildFrames(); // Wait for buildFrames to finish
+  await buildFramesWithLayout();
 
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
