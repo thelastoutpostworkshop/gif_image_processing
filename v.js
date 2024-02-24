@@ -223,13 +223,12 @@ function getClientIP(req) {
     res.send(count.toString());
   });
 
-  app.get("/api/framejpg/:screenNumber/:frameNumber", (req, res) => {
+  app.get("/api/framejpg/:espid/:screenNumber/:frameNumber", (req, res) => {
     try {
-      // const start = process.hrtime.bigint(); // Start time in nanoseconds
-
-      // Convert screenNumber and frameNumber to integers
       const screenNumber = parseInt(req.params.screenNumber, 10);
       const frameNumber = parseInt(req.params.frameNumber, 10);
+      const espid = req.params.espid;
+      console.log(`ESP id=${espid}`);
       console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
 
       // Validate the conversion results to ensure they are numbers
@@ -242,15 +241,8 @@ function getClientIP(req) {
       const frameData = getFrameJPGData(screenNumber, frameNumber);
       console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
 
-      // Set the appropriate Content-Type for binary data
-      // res.setHeader("Content-Type", "application/octet-stream");
-
       res.send(frameData);
 
-      // const end = process.hrtime.bigint(); // End time in nanoseconds
-      // const durationInNanoseconds = end - start;
-      // const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000; // Convert nanoseconds to milliseconds
-      // console.log(`API call took ${durationInMilliseconds} milliseconds.`);
     } catch (error) {
       console.error(error);
       res.status(500).send("Error retrieving frame data");
