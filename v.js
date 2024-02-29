@@ -260,6 +260,14 @@ function getFrameJPGData(espid, screenNumber, frameNumber) {
   );
   return getFrameDataFromFile(frameFile);
 }
+function getGifData(espid, screenNumber) {
+  const gifFile = path.join(
+    __dirname,
+    outputFolder,
+    screenPathPrefix+espid+`_${screenNumber}.gif`,
+  );
+  return getFrameDataFromFile(gifFile);
+}
 
 function countFilesInFolder(folderPath) {
   try {
@@ -295,13 +303,37 @@ function getClientIP(req) {
   if (!checkLayoutResolution()) {
     process.exit(1);
   }
-  await buildFramesWithLayout();
-  // await buildAnimatedGIF();
+  // await buildFramesWithLayout();
+  await buildAnimatedGIF();
 
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
     console.log(`Sending Frame count = ${count} to ${getClientIP(req)}`);
     res.send(count.toString());
+  });
+
+  app.get("/api/gif/:espid/:screenNumber", (req, res) => {
+    try {
+      const screenNumber = parseInt(req.params.screenNumber, 10);
+      const espid = req.params.espid;
+      // console.log(`ESP id=${espid}`);
+      // console.log(`Sending frame #${frameNumber} for screen #${screenNumber} to ${getClientIP(req)}`);
+
+      // Validate the conversion results to ensure they are numbers
+      if (isNaN(screenNumber)) {
+        // Respond with an error if the conversion fails
+        res.status(400).send("Screen number and frame number must be valid integers");
+        return;
+      }
+
+      const gifData = getGifData(espid, screenNumber);
+      console.log(`Sending gif for screen #${screenNumber} to ESPID=${espid} ip=${getClientIP(req)}`);
+
+      res.send(gifData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error retrieving gif data");
+    }
   });
 
   app.get("/api/framejpg/:espid/:screenNumber/:frameNumber", (req, res) => {
