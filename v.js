@@ -92,6 +92,67 @@ function checkLayoutResolution() {
   }
 }
 
+async function buildAnimatedGIF() {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(videoPath, async (err, metadata) => {
+      if (err) {
+        console.error("Error reading video metadata:", err);
+        reject(err);
+        return;
+      }
+
+      const width = metadata.streams[0].width;
+      const height = metadata.streams[0].height;
+
+      if (width % layoutConfig.screenWidth !== 0 || height % layoutConfig.screenHeight !== 0) {
+        console.error("Error: The video dimensions must be divisible by the screen dimensions.");
+        reject(new Error("Invalid video dimensions"));
+        return;
+      }
+
+      try {
+        for (const screenGroup of layoutConfig.screens) {
+          for (const screen of screenGroup.screenDetails) {
+            const outputFileName = `screen_${screenGroup.id}_${screen.num}.gif`; // Changed extension to .gif
+            const outputFilePath = path.join(__dirname, outputFolder, outputFileName);
+
+            await new Promise((innerResolve, innerReject) => {
+              ffmpeg(videoPath)
+                .videoFilters([
+                  {
+                    filter: 'crop',
+                    options: `${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`,
+                  },
+                  {
+                    filter: 'fps', // Adjust frame rate for the GIF
+                    options: FPS, // Example frame rate, adjust as needed
+                  }
+                ])
+                .outputOptions([
+                  '-pix_fmt', 'rgb24', // This can help with color representation in GIFs
+                  '-loop', '0', // Make the GIF loop
+                ])
+                .output(outputFilePath)
+                .on('end', async () => {
+                  console.log(`${outputFileName} has been saved.`);
+                  innerResolve();
+                })
+                .on('error', (err) => {
+                  console.log(`An error occurred: ${err.message}`);
+                  innerReject(err);
+                })
+                .run();
+            });
+          }
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+}
+
 async function buildFramesWithLayout() {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(videoPath, async (err, metadata) => {
@@ -234,7 +295,8 @@ function getClientIP(req) {
   if (!checkLayoutResolution()) {
     process.exit(1);
   }
-  await buildFramesWithLayout();
+  // await buildFramesWithLayout();
+  await buildAnimatedGIF();
 
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
