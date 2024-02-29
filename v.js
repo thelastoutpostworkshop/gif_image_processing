@@ -295,8 +295,8 @@ function getClientIP(req) {
   if (!checkLayoutResolution()) {
     process.exit(1);
   }
-  // await buildFramesWithLayout();
-  await buildAnimatedGIF();
+  await buildFramesWithLayout();
+  // await buildAnimatedGIF();
 
   app.get("/api/frames-count", (req, res) => {
     const count = framesCount();
