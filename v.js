@@ -22,7 +22,7 @@ const layoutConfig = {
   screenHeight: 240, // Height of each screen (pixels)
   screens: [
     {
-      id: "26506643932468",
+      id: "207775839323444",
       screenDetails: [
         { num: 0, x: 240, y: 0 },
         { num: 1, x: 240, y: 240 },
