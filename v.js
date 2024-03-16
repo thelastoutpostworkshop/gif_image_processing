@@ -12,7 +12,7 @@ const framePathPrefix = "frame_";
 
 const FPS = 24;
 
-const port = 3000;
+const port = 80;
 
 // Screen layout configuration
 const layoutConfig = {
@@ -22,7 +22,7 @@ const layoutConfig = {
   screenHeight: 240, // Height of each screen (pixels)
   screens: [
     {
-      id: "207775839323444",
+      id: "26506643932468",
       screenDetails: [
         { num: 0, x: 240, y: 0 },
         { num: 1, x: 240, y: 240 },
@@ -361,7 +361,7 @@ function getClientIP(req) {
     }
   });
 
-  app.listen({ port: 3000, host: "192.168.1.90" }, (err, address) => {
+  app.listen({ port: port, host: "192.168.1.90" }, (err, address) => {
     if (err) {
       fastify.log.error(err);
       process.exit(1);
