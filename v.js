@@ -31,7 +31,7 @@ const layoutConfig = {
       ],
     },
     {
-      id: "150596872602932",
+      id: "84024946623796",
       screenDetails: [
         { num: 0, x: 0, y: 0 },
         { num: 1, x: 0, y: 240 },
