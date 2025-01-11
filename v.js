@@ -16,7 +16,7 @@ const port = 80;
 
 // Screen layout configuration
 const layoutConfig = {
-  totalScreens: 8, // Total number of screens
+  totalScreens: 2, // Total number of screens
   screensPerRow: 2, // Number of screens per row
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
@@ -26,21 +26,31 @@ const layoutConfig = {
       screenDetails: [
         { num: 0, x: 240, y: 0 },
         { num: 1, x: 240, y: 240 },
-        { num: 2, x: 240, y: 480 },
-        { num: 3, x: 240, y: 720 },
       ],
-    },
-    {
-      id: "84024946623796",
-      screenDetails: [
-        { num: 0, x: 0, y: 0 },
-        { num: 1, x: 0, y: 240 },
-        { num: 2, x: 0, y: 480 },
-        { num: 3, x: 0, y: 720 },
-      ],
-    },
+    }
   ],
 };
+//   screens: [
+//     {
+//       id: "206947137185152",
+//       screenDetails: [
+//         { num: 0, x: 240, y: 0 },
+//         { num: 1, x: 240, y: 240 },
+//         { num: 2, x: 240, y: 480 },
+//         { num: 3, x: 240, y: 720 },
+//       ],
+//     },
+//     {
+//       id: "84024946623796",
+//       screenDetails: [
+//         { num: 0, x: 0, y: 0 },
+//         { num: 1, x: 0, y: 240 },
+//         { num: 2, x: 0, y: 480 },
+//         { num: 3, x: 0, y: 720 },
+//       ],
+//     },
+//   ],
+// };
 
 // Command line arguments
 const [, , videoPath] = process.argv;
