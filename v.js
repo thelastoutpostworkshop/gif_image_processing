@@ -16,16 +16,18 @@ const port = 80;
 
 // Screen layout configuration
 const layoutConfig = {
-  totalScreens: 2, // Total number of screens
-  screensPerRow: 2, // Number of screens per row
+  totalScreens: 4, // Total number of screens
+  screensPerRow: 4, // Number of screens per row
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
   screens: [
     {
       id: "206947137185152",
       screenDetails: [
-        { num: 0, x: 240, y: 0 },
-        { num: 1, x: 240, y: 240 },
+        { num: 0, x: 0, y: 0 },
+        { num: 1, x: 240, y: 0 },
+        { num: 2, x: 480, y: 0 },
+        { num: 3, x: 720, y: 0 },
       ],
     }
   ],
