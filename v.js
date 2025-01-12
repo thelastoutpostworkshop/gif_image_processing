@@ -1,4 +1,5 @@
-// Require the framework and instantiate it
+// GIF Server program
+//
 const app = require("fastify")({ logger: false });
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
