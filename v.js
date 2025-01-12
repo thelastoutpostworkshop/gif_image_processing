@@ -16,7 +16,7 @@ const port = 80;
 
 // Screen layout configuration
 const layoutConfig = {
-  totalScreens: 4, // Total number of screens
+  totalScreens: 8, // Total number of screens
   screensPerRow: 4, // Number of screens per row
   screenWidth: 240, // Width of each screen (pixels)
   screenHeight: 240, // Height of each screen (pixels)
@@ -29,7 +29,16 @@ const layoutConfig = {
         { num: 2, x: 480, y: 0 },
         { num: 3, x: 720, y: 0 },
       ],
-    }
+    },
+    {
+      id: "84024946623796",
+      screenDetails: [
+        { num: 0, x: 0, y: 240 },
+        { num: 1, x: 240, y: 240 },
+        { num: 2, x: 480, y: 240 },
+        { num: 3, x: 720, y: 240 },
+      ],
+    },
   ],
 };
 //   screens: [
@@ -132,24 +141,26 @@ async function buildAnimatedGIF() {
               ffmpeg(videoPath)
                 .videoFilters([
                   {
-                    filter: 'crop',
+                    filter: "crop",
                     options: `${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`,
                   },
                   {
-                    filter: 'fps', // Adjust frame rate for the GIF
+                    filter: "fps", // Adjust frame rate for the GIF
                     options: FPS, // Example frame rate, adjust as needed
-                  }
+                  },
                 ])
                 .outputOptions([
-                  '-pix_fmt', 'rgb24', // This can help with color representation in GIFs
-                  '-loop', '0', // Make the GIF loop
+                  "-pix_fmt",
+                  "rgb24", // This can help with color representation in GIFs
+                  "-loop",
+                  "0", // Make the GIF loop
                 ])
                 .output(outputFilePath)
-                .on('end', async () => {
+                .on("end", async () => {
                   console.log(`${outputFileName} has been saved.`);
                   innerResolve();
                 })
-                .on('error', (err) => {
+                .on("error", (err) => {
                   console.log(`An error occurred: ${err.message}`);
                   innerReject(err);
                 })
@@ -273,11 +284,7 @@ function getFrameJPGData(espid, screenNumber, frameNumber) {
   return getFrameDataFromFile(frameFile);
 }
 function getGifData(espid, screenNumber) {
-  const gifFile = path.join(
-    __dirname,
-    outputFolder,
-    screenPathPrefix+espid+`_${screenNumber}.gif`,
-  );
+  const gifFile = path.join(__dirname, outputFolder, screenPathPrefix + espid + `_${screenNumber}.gif`);
   return getFrameDataFromFile(gifFile);
 }
 
