@@ -32,7 +32,7 @@ const layoutConfig = {
       ],
     },
     {
-      id: "2727961984",
+      id: "2727961984xx",
       screenDetails: [
         { num: 0, x: 0, y: 240 },
         { num: 1, x: 240, y: 240 },
@@ -284,10 +284,20 @@ function getFrameJPGData(espid, screenNumber, frameNumber) {
   );
   return getFrameDataFromFile(frameFile);
 }
+
 function getGifData(espid, screenNumber) {
+  // Check if the ESPID exists in the layout configuration
+  const screenGroup = layoutConfig.screens.find(group => group.id === espid);
+  if (!screenGroup) {
+    console.error(`Error: ESP id '${espid}' not found in layout configuration.`);
+    process.exit(1); // Exit the program with an error code
+  }
+
+  // Proceed if ESPID is valid
   const gifFile = path.join(__dirname, outputFolder, screenPathPrefix + espid + `_${screenNumber}.gif`);
   return getFrameDataFromFile(gifFile);
 }
+
 
 function countFilesInFolder(folderPath) {
   try {
