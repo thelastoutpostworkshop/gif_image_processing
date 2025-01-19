@@ -25,17 +25,28 @@ const layoutConfig = {
       screenDetails: [
         { num: 0, x: 0, y: 0 },
         { num: 1, x: 240, y: 0 },
-        { num: 2, x: 480, y: 0 },
-        { num: 3, x: 720, y: 0 },
+
       ],
     },
     {
       id: "88204176352640",
       screenDetails: [
+        { num: 0, x: 480, y: 0 },
+        { num: 1, x: 720, y: 0 },
+      ],
+    },
+    {
+      id: "207775839323444",
+      screenDetails: [
         { num: 0, x: 0, y: 240 },
         { num: 1, x: 240, y: 240 },
-        { num: 2, x: 480, y: 240 },
-        { num: 3, x: 720, y: 240 },
+      ],
+    },
+    {
+      id: "99",
+      screenDetails: [
+        { num: 0, x: 480, y: 240 },
+        { num: 1, x: 720, y: 240 },
       ],
     },
   ],
