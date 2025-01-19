@@ -6,9 +6,7 @@ const fs = require("fs");
 const path = require("path");
 
 const outputFolder = "output";
-const framesFolder = "frames";
 const screenPathPrefix = "screen_";
-const framePathPrefix = "frame_";
 
 const FPS = 24; // The number of frames per second generated
 const port = 80; // Gif Server port
