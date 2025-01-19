@@ -164,10 +164,10 @@ async function buildAnimatedGIF() {
   });
 }
 
-function framesCount() {
-  const framesDir = path.join(__dirname, outputFolder, framesFolder, layoutConfig.screens[0].id, `${screenPathPrefix}0`);
-  return countFilesInFolder(framesDir);
-}
+// function framesCount() {
+//   const framesDir = path.join(__dirname, outputFolder, framesFolder, layoutConfig.screens[0].id, `${screenPathPrefix}0`);
+//   return countFilesInFolder(framesDir);
+// }
 
 function getFrameDataFromFile(filePath) {
   try {
@@ -229,11 +229,11 @@ function getClientIP(req) {
   // await buildFramesWithLayout();
   await buildAnimatedGIF();
 
-  app.get("/api/frames-count", (req, res) => {
-    const count = framesCount();
-    console.log(`Sending Frame count = ${count} to ${getClientIP(req)}`);
-    res.send(count.toString());
-  });
+  // app.get("/api/frames-count", (req, res) => {
+  //   const count = framesCount();
+  //   console.log(`Sending Frame count = ${count} to ${getClientIP(req)}`);
+  //   res.send(count.toString());
+  // });
 
   app.get("/api/gif/:espid/:screenNumber", (req, res) => {
     try {
