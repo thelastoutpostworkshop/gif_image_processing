@@ -167,7 +167,7 @@ async function buildAnimatedGIF() {
 //   return countFilesInFolder(framesDir);
 // }
 
-function getFrameDataFromFile(filePath) {
+function getGifDataFromFile(filePath) {
   try {
     const data = fs.readFileSync(filePath);
     return data;
@@ -187,27 +187,27 @@ function getGifData(espid, screenNumber) {
 
   // Proceed if ESPID is valid
   const gifFile = path.join(__dirname, outputFolder, screenPathPrefix + espid + `_${screenNumber}.gif`);
-  return getFrameDataFromFile(gifFile);
+  return getGifDataFromFile(gifFile);
 }
 
-function countFilesInFolder(folderPath) {
-  try {
-    // Read directory contents
-    const entries = fs.readdirSync(folderPath);
+// function countFilesInFolder(folderPath) {
+//   try {
+//     // Read directory contents
+//     const entries = fs.readdirSync(folderPath);
 
-    // Filter the entries to count only files
-    const files = entries.filter((entry) => {
-      const entryPath = path.join(folderPath, entry);
-      return fs.statSync(entryPath).isFile();
-    });
+//     // Filter the entries to count only files
+//     const files = entries.filter((entry) => {
+//       const entryPath = path.join(folderPath, entry);
+//       return fs.statSync(entryPath).isFile();
+//     });
 
-    // Return the count of files
-    return files.length;
-  } catch (error) {
-    console.error("Error reading folder:", error);
-    return -1; // Return 0 or handle the error as appropriate for your application
-  }
-}
+//     // Return the count of files
+//     return files.length;
+//   } catch (error) {
+//     console.error("Error reading folder:", error);
+//     return -1; // Return 0 or handle the error as appropriate for your application
+//   }
+// }
 
 function getClientIP(req) {
   let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
