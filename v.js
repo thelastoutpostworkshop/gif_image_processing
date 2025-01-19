@@ -7,13 +7,11 @@ const path = require("path");
 
 const outputFolder = "output";
 const framesFolder = "frames";
-const binFolder = "bin";
 const screenPathPrefix = "screen_";
 const framePathPrefix = "frame_";
 
-const FPS = 24;
-
-const port = 80;
+const FPS = 24;   // The number of frames per second generated
+const port = 80;  // Gif Server port
 
 // Screen layout configuration
 const layoutConfig = {
@@ -356,8 +354,11 @@ function getClientIP(req) {
       }
 
       const gifData = getGifData(espid, screenNumber);
-      console.log(`Sending gif for screen #${screenNumber} to ESPID=${espid} ip=${getClientIP(req)}`);
-
+      const now = new Date();
+      const formattedDate = now.toISOString(); // Format the date as ISO 8601 string
+      
+      console.log(`[${formattedDate}] Sending gif for screen #${screenNumber} to ESPID=${espid} ip=${getClientIP(req)}`);
+      
       res.send(gifData).then(() => {
         console.log("sent");
       });
