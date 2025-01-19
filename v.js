@@ -50,27 +50,6 @@ const layoutConfig = {
     },
   ],
 };
-//   screens: [
-//     {
-//       id: "206947137185152",
-//       screenDetails: [
-//         { num: 0, x: 240, y: 0 },
-//         { num: 1, x: 240, y: 240 },
-//         { num: 2, x: 240, y: 480 },
-//         { num: 3, x: 240, y: 720 },
-//       ],
-//     },
-//     {
-//       id: "84024946623796",
-//       screenDetails: [
-//         { num: 0, x: 0, y: 0 },
-//         { num: 1, x: 0, y: 240 },
-//         { num: 2, x: 0, y: 480 },
-//         { num: 3, x: 0, y: 720 },
-//       ],
-//     },
-//   ],
-// };
 
 // Command line arguments
 const [, , videoPath] = process.argv;
@@ -185,86 +164,6 @@ async function buildAnimatedGIF() {
   });
 }
 
-async function buildFramesWithLayout() {
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(videoPath, async (err, metadata) => {
-      if (err) {
-        console.error("Error reading video metadata:", err);
-        reject(err);
-        return;
-      }
-
-      const width = metadata.streams[0].width;
-      const height = metadata.streams[0].height;
-
-      if (width % layoutConfig.screenWidth !== 0 || height % layoutConfig.screenHeight !== 0) {
-        console.error("Error: The video dimensions must be divisible by the screen dimensions.");
-        reject(new Error("Invalid video dimensions"));
-        return;
-      }
-
-      try {
-        for (const screenGroup of layoutConfig.screens) {
-          for (const screen of screenGroup.screenDetails) {
-            const outputFileName = `screen_${screenGroup.id}_${screen.num}.mp4`;
-            const outputFilePath = path.join(__dirname, outputFolder, outputFileName);
-
-            await new Promise((innerResolve, innerReject) => {
-              ffmpeg(videoPath)
-                .videoFilters({
-                  filter: "crop",
-                  options: `${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`,
-                })
-                .output(outputFilePath)
-                .on("end", async () => {
-                  await processPartJPG(outputFilePath, screenGroup, screen);
-
-                  console.log(`${outputFileName} has been saved.`);
-                  innerResolve();
-                })
-                .on("error", (err) => {
-                  console.log(`An error occurred: ${err.message}`);
-                  innerReject(err);
-                })
-                .run();
-            });
-          }
-        }
-        resolve();
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
-}
-
-async function processPartJPG(videoPartPath, screenGroup, screen) {
-  const output = path.join(__dirname, outputFolder, framesFolder, screenGroup.id, `${screenPathPrefix}${screen.num}`);
-  if (!fs.existsSync(output)) {
-    fs.mkdirSync(output, { recursive: true });
-  }
-
-  // Change the file extension from .png to .jpg
-  const frameOutputPattern = path.join(output, "frame_%03d.jpg");
-
-  return new Promise((resolve, reject) => {
-    ffmpeg(videoPartPath)
-      .outputOptions("-vf", `fps=${FPS}`)
-      // Optionally, specify JPEG quality (e.g., 90%)
-      .outputOptions("-q:v", "2") // JPEG quality scale: 2 is high quality, 31 is low quality.
-      .output(frameOutputPattern)
-      .on("end", function () {
-        // Directly resolve the promise since convertFramesToBinFiles(partIndex) call is removed
-        resolve();
-      })
-      .on("error", function (err) {
-        console.log(`An error occurred while extracting frames for part ${partIndex - 1}: ${err.message}`);
-        reject(err);
-      })
-      .run();
-  });
-}
-
 function framesCount() {
   const framesDir = path.join(__dirname, outputFolder, framesFolder, layoutConfig.screens[0].id, `${screenPathPrefix}0`);
   return countFilesInFolder(framesDir);
@@ -278,19 +177,6 @@ function getFrameDataFromFile(filePath) {
     console.error(`Gif part does not exist, verifiy screen arrangement on the ESP32 ${filePath}`);
     process.exit(1); 
   }
-}
-
-function getFrameJPGData(espid, screenNumber, frameNumber) {
-  const formattedFrameNumber = String(frameNumber + 1).padStart(3, "0");
-  const frameFile = path.join(
-    __dirname,
-    outputFolder,
-    framesFolder,
-    espid,
-    `${screenPathPrefix}${screenNumber}`,
-    `${framePathPrefix}${formattedFrameNumber}.jpg`
-  );
-  return getFrameDataFromFile(frameFile);
 }
 
 function getGifData(espid, screenNumber) {
