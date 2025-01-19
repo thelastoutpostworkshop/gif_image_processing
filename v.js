@@ -32,7 +32,7 @@ const layoutConfig = {
       ],
     },
     {
-      id: "2727961984",
+      id: "88204176352640",
       screenDetails: [
         { num: 0, x: 0, y: 240 },
         { num: 1, x: 240, y: 240 },
@@ -287,7 +287,7 @@ function getFrameJPGData(espid, screenNumber, frameNumber) {
 
 function getGifData(espid, screenNumber) {
   // Check if the ESPID exists in the layout configuration
-  const screenGroup = layoutConfig.screens.find(group => group.id === espid);
+  const screenGroup = layoutConfig.screens.find((group) => group.id === espid);
   if (!screenGroup) {
     console.error(`Error: ESP id '${espid}' not found in layout configuration.`);
     process.exit(1); // Exit the program with an error code
@@ -297,7 +297,6 @@ function getGifData(espid, screenNumber) {
   const gifFile = path.join(__dirname, outputFolder, screenPathPrefix + espid + `_${screenNumber}.gif`);
   return getFrameDataFromFile(gifFile);
 }
-
 
 function countFilesInFolder(folderPath) {
   try {
@@ -359,7 +358,9 @@ function getClientIP(req) {
       const gifData = getGifData(espid, screenNumber);
       console.log(`Sending gif for screen #${screenNumber} to ESPID=${espid} ip=${getClientIP(req)}`);
 
-      res.send(gifData);
+      res.send(gifData).then(() => {
+        console.log("sent");
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send("Error retrieving gif data");
