@@ -1,6 +1,6 @@
 // GIF Server program
 //
-const app = require("fastify")({ logger: false });
+const app = require("fastify")({ logger: false, connectionTimeout: 1000 });
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
