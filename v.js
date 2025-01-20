@@ -287,6 +287,10 @@ function getClientIP(req) {
     }
   });
 
+  // app.addHook('onRequest', async (request, reply) => {
+  //   console.log(`Connection attempt from ${request.ip} at ${new Date().toISOString()}`);
+  // });
+
   app.listen({ port: port, host: "192.168.1.90" }, (err, address) => {
     if (err) {
       fastify.log.error(err);
