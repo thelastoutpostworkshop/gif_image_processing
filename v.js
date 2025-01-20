@@ -9,7 +9,7 @@ const outputFolder = "output";
 const screenPathPrefix = "screen_";
 
 const FPS = 24; // The number of frames per second generated
-const port = 80; // Gif Server port
+const port = 8080; // Gif Server port
 
 // Screen layout configuration
 const layoutConfig = {
