@@ -21,30 +21,29 @@ const layoutConfig = {
     {
       id: "84024946623796",
       screenDetails: [
-        { num: 0, x: 0, y: 0 },
-        { num: 1, x: 240, y: 0 },
+        { num: 0, x: 0, y: 0, rotation: 180 },
+        { num: 1, x: 240, y: 0, rotation: 180 },
       ],
     },
     {
       id: "88204176352640",
       screenDetails: [
-        { num: 0, x: 480, y: 0 },
-        { num: 1, x: 720, y: 0 },
+        { num: 0, x: 480, y: 0, rotation: 180 },
+        { num: 1, x: 720, y: 0, rotation: 180 },
       ],
     },
     {
       id: "207775839323444",
       screenDetails: [
-        { num: 0, x: 480, y: 240 },
-        { num: 1, x: 720, y: 240 },
+        { num: 0, x: 480, y: 240, rotation: 180 },
+        { num: 1, x: 720, y: 240, rotation: 180 },
       ],
     },
     {
       id: "206947137185152",
       screenDetails: [
-
-        { num: 0, x: 0, y: 240 },
-        { num: 1, x: 240, y: 240 },
+        { num: 0, x: 0, y: 240, rotation: 180 },
+        { num: 1, x: 240, y: 240, rotation: 180 },
       ],
     },
   ],
@@ -121,34 +120,33 @@ async function buildAnimatedGIF() {
       try {
         for (const screenGroup of layoutConfig.screens) {
           for (const screen of screenGroup.screenDetails) {
-            const outputFileName = `screen_${screenGroup.id}_${screen.num}.gif`; // Changed extension to .gif
+            const outputFileName = `screen_${screenGroup.id}_${screen.num}.gif`;
             const outputFilePath = path.join(__dirname, outputFolder, outputFileName);
 
             await new Promise((innerResolve, innerReject) => {
+              const videoFilters = [
+                `crop=${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`,
+                `fps=${FPS}`,
+              ];
+
+              // Add rotation filter if needed
+              if (screen.rotation) {
+                videoFilters.push(`rotate=${(screen.rotation * Math.PI) / 180}:ow=iw:oh=ih`);
+              }
+
               ffmpeg(videoPath)
-                .videoFilters([
-                  {
-                    filter: "crop",
-                    options: `${layoutConfig.screenWidth}:${layoutConfig.screenHeight}:${screen.x}:${screen.y}`,
-                  },
-                  {
-                    filter: "fps", // Adjust frame rate for the GIF
-                    options: FPS, // Example frame rate, adjust as needed
-                  },
-                ])
+                .videoFilters(videoFilters)
                 .outputOptions([
-                  "-pix_fmt",
-                  "rgb24", // This can help with color representation in GIFs
-                  "-loop",
-                  "0", // Make the GIF loop
+                  "-pix_fmt", "rgb24", // GIF pixel format
+                  "-loop", "0", // Loop the GIF
                 ])
                 .output(outputFilePath)
-                .on("end", async () => {
+                .on("end", () => {
                   console.log(`${outputFileName} has been saved.`);
                   innerResolve();
                 })
                 .on("error", (err) => {
-                  console.log(`An error occurred: ${err.message}`);
+                  console.error(`An error occurred: ${err.message}`);
                   innerReject(err);
                 })
                 .run();
