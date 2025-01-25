@@ -19,7 +19,7 @@ const layoutConfig = {
   screenHeight: 240, // Height of each screen (pixels)
   screens: [
     {
-      id: "206947137185152",
+      id: "84024946623796",
       screenDetails: [
         { num: 0, x: 0, y: 0 },
         { num: 1, x: 240, y: 0 },
@@ -35,15 +35,16 @@ const layoutConfig = {
     {
       id: "207775839323444",
       screenDetails: [
-        { num: 0, x: 0, y: 240 },
-        { num: 1, x: 240, y: 240 },
+        { num: 0, x: 480, y: 240 },
+        { num: 1, x: 720, y: 240 },
       ],
     },
     {
-      id: "84024946623796",
+      id: "206947137185152",
       screenDetails: [
-        { num: 0, x: 480, y: 240 },
-        { num: 1, x: 720, y: 240 },
+
+        { num: 0, x: 0, y: 240 },
+        { num: 1, x: 240, y: 240 },
       ],
     },
   ],
@@ -173,7 +174,7 @@ function getGifDataFromFile(filePath) {
     return data;
   } catch (err) {
     console.error(`Gif part does not exist, verifiy screen arrangement on the ESP32 ${filePath}`);
-    process.exit(1); 
+    process.exit(1);
   }
 }
 
@@ -182,7 +183,7 @@ function getGifData(espid, screenNumber) {
   const screenGroup = layoutConfig.screens.find((group) => group.id === espid);
   if (!screenGroup) {
     console.error(`Error: ESP id '${espid}' not found in layout configuration.`);
-    process.exit(1); 
+    process.exit(1);
   }
 
   // Proceed if ESPID is valid
