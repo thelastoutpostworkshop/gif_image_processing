@@ -21,15 +21,15 @@ const layoutConfig = {
     {
       id: "84024946623796",
       screenDetails: [
-        { num: 0, x: 0, y: 0, rotation: 180 },
-        { num: 1, x: 240, y: 0, rotation: 180 },
+        { num: 0, x: 0, y: 0, rotation: 0 },
+        { num: 1, x: 240, y: 0, rotation: 0 },
       ],
     },
     {
       id: "88204176352640",
       screenDetails: [
-        { num: 0, x: 480, y: 0, rotation: 180 },
-        { num: 1, x: 720, y: 0, rotation: 180 },
+        { num: 0, x: 480, y: 0, rotation: 0 },
+        { num: 1, x: 720, y: 0, rotation: 0 },
       ],
     },
     {
