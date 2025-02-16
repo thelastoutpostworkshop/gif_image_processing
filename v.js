@@ -1,4 +1,4 @@
-// GIF Server program
+// GIF Image Processor
 //
 const app = require("fastify")({ logger: false, connectionTimeout: 1000 });
 const ffmpeg = require("fluent-ffmpeg");
