@@ -53,7 +53,7 @@ const layoutConfig = {
 const [, , videoPath] = process.argv;
 
 if (!videoPath) {
-  console.log("Usage: node processVideo.js <videoPath>");
+  console.log("Usage: node gif_image_generator.js <videoPath>");
   process.exit(1);
 }
 
