@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build",
+    "start": "node dist/gif_image_generator.js",
+    "dev": "vite"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +14,8 @@
   "dependencies": {
     "fastify": "^5.2.1",
     "fluent-ffmpeg": "^2.1.2"
+  },
+  "devDependencies": {
+    "vite": "^6.1.0"
   }
 }
