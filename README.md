@@ -4,7 +4,6 @@
 </a>
 
 [<img src="https://github.com/thelastoutpostworkshop/images/blob/main/Curved%20Screen%202.png" width="300">](https://youtu.be/d49A0miFdqo)
-node 
 
 ## Installation
 This is a nodejs web server application.
