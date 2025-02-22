@@ -1,5 +1,7 @@
 // GIF Image Processor
 //
+// Tutorial : https://youtu.be/d49A0miFdqo
+//
 const app = require("fastify")({ logger: false, connectionTimeout: 1000 });
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
